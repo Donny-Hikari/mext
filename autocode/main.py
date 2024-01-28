@@ -8,8 +8,10 @@ from langchain.memory import VectorStoreRetrieverMemory
 # from langchain_community.vectorstores import FAISS
 # from langchain.docstore import InMemoryDocstore
 
-from .libs.config_loader import CFG
-from .libs.utils import setupLogging, LOG_VERBOSE
+from autocode.libs.config_loader import CFG
+from autocode.libs.utils import setupLogging, LOG_VERBOSE
+from autocode.libs.utils import ObjDict
+from autocode.libs.mext import Mext
 
 def parse_args(argv=sys.argv[1:]):
   parser = argparse.ArgumentParser()
@@ -17,7 +19,7 @@ def parse_args(argv=sys.argv[1:]):
   args = parser.parse_args(argv)
   return args
 
-def main():
+def test_langchain():
   args = parse_args()
   cfg = CFG.load_config_as_obj(args.config)
   openai_creds = CFG.load_config_as_obj(cfg.credentials.openai)
@@ -48,6 +50,46 @@ def main():
   outputs = llm_chain.invoke(inputs)
 
   print(outputs)
+
+def main():
+  context_mgr = Mext()
+  prompts = ObjDict({
+    'autotask': "prompts/autotask.mext",
+    'actions_list': "prompts/components/actions_list.mext",
+  })
+
+  prompt = context_mgr.compose(
+    template_fn=prompts.autotask,
+    use_async=False,
+
+    prompts=prompts,
+    profile="You are Alex.",
+    task="Dummy task",
+    progress=[
+      { 'name': "Step 1", 'state': "Done", },
+      { 'name': "Step 2", 'state': "Ongoing", },
+      { 'name': "Step 3", 'state': "Todo", },
+    ],
+    notes=[
+      { 'content': "Note 1", },
+      { 'content': "Note 2", },
+    ],
+    workspace=[
+      { 'name': "main.py", 'abstract': "The entry file for the program.", },
+    ],
+    action_list=[
+      {
+        'name': "Search the web",
+        'desc': "Search the web for more information",
+        'parameters': {
+          'query': "string. The query string.",
+          'date_range': "integer. Search for web documents updated within date_range days.",
+        },
+      },
+    ],
+  )
+
+  print(prompt)
 
 if __name__ == "__main__":
   main()

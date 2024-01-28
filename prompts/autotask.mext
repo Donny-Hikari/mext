@@ -13,7 +13,7 @@
 
 ## Notes
 {@for note in notes}
-- note[content]
+- {note[content]}
 {@endfor}
 
 ## Workspace
@@ -28,3 +28,7 @@ The following files are in the workspace.
 {@include prompts.actions_list}
 
 ## Instructions
+In the Answer section, response with an Answer object.
+An Answer object is a JSON object with the following fields. All fields are required unless stated otherwise.
+|name|type|desc|
+|---|---|---|

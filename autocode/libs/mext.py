@@ -1,14 +1,16 @@
+import re
+import json
 from string import Formatter
 from typing import Union, Tuple, Coroutine, Awaitable, Callable
 import asyncio
-import re
-import json
+from contextlib import contextmanager
 
 from autocode.libs.utils import auto_async
 from autocode.libs.utils import ObjDict
 
 class MextParser:
   Keywords = [
+    'option',
     'set',
     'default',
     'include',
@@ -28,13 +30,6 @@ class MextParser:
   ]
   DescLevel = [
     'endif',
-    'endfor',
-  ]
-  NonBlock = [
-    'if',
-    'else',
-    'endif',
-    'for',
     'endfor',
   ]
 
@@ -58,7 +53,7 @@ class MextParser:
 
     self.state = ObjDict()
     self.level = 0
-    self.pending_whitespaces = ''
+    self.pending_whitespaces = None
 
     self.constants = {
       'true': True,
@@ -68,9 +63,14 @@ class MextParser:
     self.callbacks = {}
     self.template_loader = self.load_template_file
     self.locals = {}
+
+    self.options = {
+      'final_strip': True,
+    }
     self.for_context = []
     self.trim_newline_state = []
     self.results = []
+    self.input_results = {}
 
   def register_formatter(self, format_name, formatter):
     self.formatters[format_name] = formatter
@@ -128,15 +128,22 @@ class MextParser:
       })
       yield self.state
 
-  def append_text(self, text):
+  def append_text(self, text, flush_pending=True):
     text = str(text)
     if len(text) > 0:
+      if flush_pending and self.pending_whitespaces is not None:
+        self.results.append(self.pending_whitespaces)
+        self.pending_whitespaces = None
       self.results.append(str(text))
       if self.debug_trace:
         self.trace.append((self.pos_index, self.state.copy()))
 
-  def get_result(self):
-    return ''.join(self.results).strip()
+  @property
+  def parsed_result(self):
+    parsed_result = ''.join(self.results)
+    if self.options['final_strip']:
+      parsed_result = parsed_result.strip()
+    return parsed_result
 
   def skip_until(self, target_keywords=[], inc_level=[], desc_level=[]):
     target_level = self.level
@@ -185,7 +192,7 @@ class MextParser:
       self.template_loader = template_loader
 
     for state in self.next_component():
-      self.process_literal(append=True)
+      self.process_literal()
 
       if state.keyword is not None:
         if state.keyword not in self.Keywords:
@@ -200,9 +207,9 @@ class MextParser:
       elif state.field_name is not None:
         await self.parse_field()
 
-    return self.get_result()
+    return self.parsed_result
 
-  def process_literal(self, append):
+  def process_literal(self):
     whitespaces = r'[ \t]'
 
     text: str = self.state.literal_text
@@ -210,14 +217,15 @@ class MextParser:
     if self.pending_whitespaces is not None:
       if (m := re.search(fr'\A{whitespaces}*\n', text)) is not None:
         text = re.sub(fr'\A{whitespaces}*\n', '', text)
-        self.pending_whitespaces = re.sub(fr'{whitespaces}*', '', self.pending_whitespaces)
+        self.pending_whitespaces = re.sub(fr'{whitespaces}*\Z', '', self.pending_whitespaces)
       if self.state.keyword not in [None] and re.fullmatch(fr'({whitespaces}|\n)*', text) is not None:
         pass
       else:
-        self.append_text(self.pending_whitespaces)
+        self.append_text(self.pending_whitespaces, flush_pending=False)
       self.pending_whitespaces = None
 
-    if self.state.keyword not in [None] and (m := re.search(fr'\n{whitespaces}*\Z', text)):
+    if self.state.keyword not in [None] and ((m := re.search(fr'\n{whitespaces}*\Z', text))
+      or (self.pos_index == 0 and (m := re.fullmatch(fr'{whitespaces}*', text)))):
       text = re.sub(fr'\n{whitespaces}*\Z', '', text)
       self.pending_whitespaces = m[0]
 
@@ -238,9 +246,25 @@ class MextParser:
             break
           last_state = self.trim_newline_state[-1]
 
-    if append:
-      self.append_text(text)
-    return text
+    self.append_text(text, flush_pending=False)
+
+  async def parse_option(self):
+    self.assert_missing_statement()
+
+    parts = self.state.statement.split(' ', 1)
+    if len(parts) != 2:
+      self.raise_syntax_error('Keyword "option" requries "@option option_name [on|off]" syntax.')
+
+    opt_name = parts[0]
+    val = parts[1]
+    if val == "on":
+      val = True
+    elif val == "off":
+      val = False
+    else:
+      self.raise_syntax_error('The second parameter for keyword "option" should be "on" or "off".')
+
+    self.options[opt_name] = val
 
   async def parse_set(self):
     self.assert_missing_statement()
@@ -298,6 +322,20 @@ class MextParser:
     )
     self.append_text(nested_result)
 
+  async def parse_input(self):
+    self.assert_missing_statement()
+
+    varname = self.state.statement
+    if varname not in self.callbacks:
+      self.raise_error(RuntimeError, f'Missing callback for input variable "{varname}".')
+    input_val = self.callbacks[varname](self.parsed_result)
+    if asyncio.iscoroutine(input_val):
+      input_val = await input_val
+
+    self.append_text(input_val)
+    self.locals[varname] = input_val
+    self.input_results[varname] = input_val
+
   async def parse_if(self):
     self.assert_missing_statement()
     statement = self.state.statement
@@ -350,9 +388,7 @@ class MextParser:
   async def parse_for(self):
     self.assert_missing_statement()
 
-    statement = self.state.statement
-
-    parts = statement.split(' ', 3)
+    parts = self.state.statement.split(' ', 3)
     if len(parts) != 3:
       self.raise_syntax_error('Keyword "for" requires "@for item in iterable" syntax.')
 
@@ -400,8 +436,8 @@ class MextParser:
   async def parse_trim_newline(self):
     self.assert_unexpected_statement()
 
-    self.append_text(self.pending_whitespaces)
-    self.pending_whitespaces = ''
+    self.append_text(self.pending_whitespaces, flush_pending=False)
+    self.pending_whitespaces = None
     self.trim_newline_state.append(ObjDict({
       'level': self.level,
       'pos_mark': len(self.results),
@@ -409,7 +445,6 @@ class MextParser:
 
   async def parse_format(self):
     self.assert_missing_statement()
-
     statement = self.state.statement
 
     parts = statement.split(' ', 1)
@@ -437,56 +472,32 @@ class MextParser:
   async def format_json(self, value):
     return json.dumps(value, indent=2, ensure_ascii=False)
 
-def get_template_helper(v):
-  class TemplateHelper:
-    def __init__(self, template=None, template_fn=None):
-      self.template = template
-      self.template_fn = template_fn
-
-    def __enter__(self):
-      self.old_template = v.template
-
-      v.set_template(template=self.template, template_fn=self.template_fn)
-      return v
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-      v.set_template(template=self.old_template)
-
-  return TemplateHelper
-
-def get_params_helper(v):
-  class ParamsHelper:
-    def __init__(self, **kwargs):
-      self.params = kwargs
-
-    def __enter__(self):
-      self.old_params = v.params
-
-      v.set_params(**self.params)
-      return v
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-      v.clear_params()
-      v.set_params(**self.old_params)
-
-  return ParamsHelper
 
 class Mext:
-  INPUT_SYNTAX = "@input_"
-  INCLUDE_SYNTAX = "@include_"
-  CONDITION_START_SYNTAX = "@if_"
-  CONDITION_END_SYNTAX = "@endif"
-  TRIM_NEWLINE_SYNTAX = "@trim_newline"
-  ON_SYNTAX = "@on_"
-  OFF_SYNTAX = "@off_"
-
   PROMPT_CACHE = {}
 
   def __init__(self):
     self.template = ""
     self.params = {}
-    self.use_template = get_template_helper(self)
-    self.use_params = get_params_helper(self)
+
+  @contextmanager
+  def use_template(self, template=None, template_fn=None):
+    old_template = self.template
+
+    self.set_template(template=template, template_fn=template_fn)
+    yield
+
+    self.set_template(template=old_template)
+
+  @contextmanager
+  def use_params(self, **kwargs):
+    old_params = self.params
+
+    self.set_params(**kwargs)
+    yield
+
+    self.clear_params()
+    self.set_params(**old_params)
 
   def set_template(self, template=None, template_fn=None):
     if template is not None:
@@ -506,19 +517,17 @@ class Mext:
   def has_param(self, param_name):
     return param_name in self.params
 
-  @classmethod
-  def _load_template(cls, template_fn):
-    return cls._load_prompt(f"{template_fn}")
+  def _load_template(self, template_fn):
+    return self._load_prompt(f"{template_fn}")
 
-  @classmethod
-  def _load_prompt(cls, prompt_source, reload=False):
-    if not reload and prompt_source in cls.PROMPT_CACHE:
-      return cls.PROMPT_CACHE[prompt_source]
+  def _load_prompt(self, prompt_source, reload=False):
+    if not reload and prompt_source in Mext.PROMPT_CACHE:
+      return Mext.PROMPT_CACHE[prompt_source]
 
     with open(prompt_source) as f:
       prompt = ''.join(f.readlines())
     prompt = prompt.strip()
-    cls.PROMPT_CACHE[prompt_source] = prompt
+    Mext.PROMPT_CACHE[prompt_source] = prompt
 
     return prompt
 
@@ -544,144 +553,10 @@ class Mext:
       **kwargs,
     }
 
-    formatter = Formatter()
-    entries = formatter.parse(cur_template)
-    parsed_result = []
-    all_results = {}
-    trim_newline_state = None
-    conditions = []
-    prev_was_if = False
-    settings = {
-      'final_strip': True,
-    }
-
-    async def get_field_value(field_name):
-      field_value, _ = formatter.get_field(field_name, args=[], kwargs=all_kwargs)
-      if callable(field_value):
-        field_value = field_value()
-        if asyncio.iscoroutine(field_value):
-          field_value = await field_value
-      return field_value
-
-    for literal_text, field_name, format_spec, conversion in entries:
-      is_if = False
-      is_endif = False
-      is_include = False
-      is_input = False
-      is_trim_newline = False
-      is_on = False
-      is_off = False
-
-      if field_name is not None:
-        if is_if := field_name.startswith(Mext.CONDITION_START_SYNTAX):
-          pass
-        elif is_endif := (field_name == Mext.CONDITION_END_SYNTAX):
-          condition = conditions.pop()
-          if not condition:
-            literal_text = ''
-      if len(conditions) > 0 and not conditions[-1]:
-        continue
-
-      if trim_newline_state == 'trim':
-        literal_text = literal_text.lstrip('\n')
-        trim_newline_state = None
-      if prev_was_if and literal_text.startswith('\n'):
-        literal_text = literal_text[1:]
-      if is_endif and literal_text.endswith('\n'):
-        literal_text = literal_text[:-1]
-      parsed_result.append(literal_text)
-      prev_was_if = False
-
-      field_value = ''
-      if field_name is not None:
-        real_field_name = None
-        if is_include := field_name.startswith(Mext.INCLUDE_SYNTAX):
-          real_field_name = field_name[len(Mext.INCLUDE_SYNTAX):]
-          included_template_fn, _ = formatter.get_field(real_field_name, args=[], kwargs=all_kwargs)
-          res = ''
-          if included_template_fn is not None:
-            res = await self.compose(
-              template_fn=included_template_fn,
-              callbacks=callbacks,
-              **kwargs,
-              use_async=True,
-            )
-            if type(res) is tuple:
-              res = res[0]
-          field_value = res
-        elif is_input := field_name.startswith(Mext.INPUT_SYNTAX):
-          real_field_name = field_name[len(Mext.INPUT_SYNTAX):]
-          try:
-            field_value = await get_field_value(real_field_name)
-          except KeyError:
-            parsed_result = [''.join(parsed_result)]
-            field_value = callbacks[real_field_name](parsed_result[0])
-            if asyncio.iscoroutine(field_value):
-              field_value = await field_value
-        elif is_trim_newline := field_name == Mext.TRIM_NEWLINE_SYNTAX:
-          trim_newline_state = 'start'
-        elif is_if := field_name.startswith(Mext.CONDITION_START_SYNTAX):
-          real_field_name = field_name[len(Mext.CONDITION_START_SYNTAX):]
-          field_value = await get_field_value(real_field_name)
-          conditions.append(field_value)
-        elif is_endif:
-          pass
-        elif (is_on := field_name.startswith(Mext.ON_SYNTAX)):
-          real_field_name = field_name[len(Mext.ON_SYNTAX):]
-          settings[real_field_name] = True
-        elif (is_off := field_name.startswith(Mext.OFF_SYNTAX)):
-          real_field_name = field_name[len(Mext.OFF_SYNTAX):]
-          settings[real_field_name] = False
-        else:
-          field_value = await get_field_value(field_name)
-
-        if not is_trim_newline and not is_if and not is_endif:
-          if conversion is not None:
-            field_value = formatter.convert_field(field_value, conversion)
-          field_value = formatter.format_field(field_value, format_spec)
-          parsed_result.append(field_value)
-          if is_input:
-            all_results[real_field_name] = field_value
-
-      if trim_newline_state is not None and not is_if:
-        if trim_newline_state == 'start':
-          trim_newline_state = 'watch'
-        elif trim_newline_state == 'watch':
-          if len(field_value) == 0:
-            trim_newline_state = 'trim'
-          else:
-            trim_newline_state = None
-
-      prev_was_if = is_if
-    parsed_result = ''.join(parsed_result)
-
-    if settings.get('final_strip') is True:
-      parsed_result = parsed_result.strip()
+    parser = MextParser()
+    parsed_result = await parser.parse(template=cur_template, params=all_kwargs, callbacks=callbacks, template_loader=self._load_template)
 
     if callbacks is None:
       return parsed_result
     else:
-      return parsed_result, all_results
-
-class ContextManager(Mext):
-  def __init__(self, session=None):
-    Mext.__init__(self)
-    self.profile = self._load_template(cfg.prompt.profile)
-    self.session = session
-    self.set_params(
-      profile=self.profile,
-      has_session_mem=self.has_session_mem,
-      session_mem=self.get_session_mem,
-      ai=cfg.ai,
-      prompts=cfg.prompt,
-    )
-
-  @classmethod
-  def _load_template(cls, template_fn):
-    return cls._load_prompt(f"{cfg.dirs.prompt}/{template_fn}")
-
-  def has_session_mem(self):
-    return self.session is not None
-
-  def get_session_mem(self):
-    return "" if self.session is None else self.session.get_mem()
+      return parsed_result, parser.input_results

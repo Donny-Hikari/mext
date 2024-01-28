@@ -25,6 +25,26 @@ class TestMextParser(unittest.TestCase):
     }, use_async=False)
     self.assertEqual(res, "Pass")
 
+  def test_option(self):
+    parser = MextParser()
+
+    parser.reset()
+    parser.enable_trace(True)
+    res = parser.parse("""\
+{@option final_strip off}
+Empty line at the end.
+""", use_async=False)
+    self.assertEqual(res, "Empty line at the end.\n")
+
+    parser = MextParser()
+    res = parser.parse("""\
+{@option final_strip off}
+{var}
+Empty line above.""", {
+      'var': "",
+    }, use_async=False)
+    self.assertEqual(res, "\nEmpty line above.")
+
   def test_set(self):
     parser = MextParser()
     res = parser.parse("""\
@@ -102,6 +122,35 @@ class TestMextParser(unittest.TestCase):
       'prompts': self.prompts,
     }, use_async=False)
     self.assertEqual(res, "Using additional parameter value.")
+
+    res = parser.parse("""\
+Included from template1:
+{@include prompts.template1 var1=false}
+""", params={
+      'prompts': self.prompts,
+    }, use_async=False)
+    self.assertEqual(res, "Included from template1:\nUsing additional parameter value.")
+
+  def test_input(self):
+    parser = MextParser()
+    res = parser.parse("""\
+name: {@input name}
+age: {@input age}
+We now know that {name} is {age} year old.
+""",
+      callbacks={
+        'name': lambda x: "Alice",
+        'age': lambda x: 19,
+    }, use_async=False)
+    self.assertEqual(res, """\
+name: Alice
+age: 19
+We now know that Alice is 19 year old.\
+""")
+    self.assertDictEqual(parser.input_results, {
+      'name': "Alice",
+      'age': 19,
+    })
 
   def test_if(self):
     parser = MextParser()
@@ -237,8 +286,6 @@ favorite: Apple
 Age: 19\
 """)
 
-    parser.reset()
-    parser.enable_trace(True)
     res = parser.parse("""\
 Two
 {@if false}

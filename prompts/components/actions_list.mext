@@ -2,9 +2,9 @@ The following actions are available.
 {@for action in action_list}
 - name: {action[name]}
   desc: {action[desc]}
-  parameters: {@if action[parameters].__len__}
-    {@for k in action[parameters]}
-    {k}: {action[parameters][k]}
+  parameters: {@if not empty action[parameters]}
+    {@for param in action[parameters].items}
+    {param[0]}: {param[1]}
     {@endfor}
   {@else}[]
   {@endif}
