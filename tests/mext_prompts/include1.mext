@@ -1,0 +1,6 @@
+{@default var1 true}
+{@if var1}
+Using default value.
+{@else}
+Using additional parameter value.
+{@endif}

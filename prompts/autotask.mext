@@ -1,0 +1,30 @@
+## Profile
+{profile}
+
+## Task
+{task}
+
+## Progress
+|step|state|
+|---|---|
+{@for item in progress}
+|{item[name]}|{item[state]}|
+{@endfor}
+
+## Notes
+{@for note in notes}
+- note[content]
+{@endfor}
+
+## Workspace
+The following files are in the workspace.
+|name|abstract|
+|---|---|
+{@for file in workspace}
+|{file[name]}|{file[abstract]}|
+{@endfor}
+
+## Actions
+{@include prompts.actions_list}
+
+## Instructions

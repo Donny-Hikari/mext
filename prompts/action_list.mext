@@ -1,0 +1,11 @@
+The following actions are available.
+{@for action in action_list}
+- name: {action[name]}
+  desc: {action[desc]}
+  parameters: {@if action[parameters].__len__}
+    {@for k in action[parameters]}
+    {k}: {action[parameters][k]}
+    {@endfor}
+  {@else}[]
+  {@endif}
+{@endfor}
