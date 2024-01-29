@@ -1,3 +1,8 @@
+{@default prompts none}
+{@if empty prompts}
+{@import "render_prompts/params/autotask.yaml"}
+{@endif}
+
 ## Profile
 {@include prompts.profile}
 
@@ -25,7 +30,7 @@ The following files are in the workspace.
 {@endfor}
 
 ## Actions
-{@include prompts.actions_list}
+{@include prompts.actions_list actions_list=actions_list}
 
 ## Instructions
 In the Answer section, response with an Answer object.

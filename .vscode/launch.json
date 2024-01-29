@@ -12,9 +12,7 @@
       "args": [
         "${file}",
         "-o",
-        "render_prompts/outputs/${fileBasenameNoExtension}.md",
-        "-p",
-        "render_prompts/params/${fileBasenameNoExtension}.yaml"
+        "render_prompts/outputs/${fileBasenameNoExtension}.md"
       ],
       "justMyCode": true
     },

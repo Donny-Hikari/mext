@@ -37,6 +37,12 @@ class MextParser:
     'endfor',
   ]
 
+  Constants = {
+    'true': True,
+    'false': False,
+    'none': None,
+  }
+
   def __init__(self):
     self.reset()
 
@@ -59,10 +65,6 @@ class MextParser:
     self.level = 0
     self.pending_whitespaces = None
 
-    self.constants = {
-      'true': True,
-      'false': False,
-    }
     self.params = {}
     self.callbacks = {}
     self.template_loader = self.load_template_file
@@ -94,7 +96,7 @@ class MextParser:
   @property
   def all_variables(self):
     return {
-      **self.constants,
+      **MextParser.Constants,
       **self.params,
       **self.locals,
     }
@@ -243,8 +245,6 @@ class MextParser:
               # if the block after '@trim_newline' produces empty,
               # trim the new lines after the block
               text = re.sub(r'\A\n*', '', text)
-              if self.pending_whitespaces is not None:
-                self.pending_whitespaces = self.pending_whitespaces.strip('\n')
           self.trim_newline_state.pop()
           if len(self.trim_newline_state) == 0:
             break
@@ -344,7 +344,7 @@ class MextParser:
     self.assert_missing_statement()
     statement = self.state.statement
 
-    parts = re.match(r'^(?:\"(?P<filepath>(?:[^"]|(?<=\\)\")*(?<!\\))\"|(?P<filepath_var>[^"\s]*))(?:\s+as\s+(?P<namespace>.*))?$', statement)
+    parts = re.match(r'^(?:\"(?P<filepath>(?:[^\"]|(?<=\\)\")*(?<!\\))\"|(?P<filepath_var>[^"\s]*))(?:\s+as\s+(?P<namespace>.*))?$', statement)
     if parts is None:
       self.raise_syntax_error(f'Keyword "import" requries "@import filename_variable [as varname]" syntax')
 

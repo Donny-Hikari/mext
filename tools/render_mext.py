@@ -11,7 +11,7 @@ def parse_args(argv=sys.argv[1:]):
   parser = argparse.ArgumentParser()
   parser.add_argument(dest="mextfile", type=str, help="The mextfile to render.")
   parser.add_argument("-o", "--output", type=str, help="The destination to output the rendered file.")
-  parser.add_argument("-p", "--params", action="append", type=str, help="The file that definited the parameters in the mextfile.")
+  parser.add_argument("-p", "--params", action="append", type=str, default=[], help="The file that definited the parameters in the mextfile.")
   args = parser.parse_args(argv)
   return args
 
