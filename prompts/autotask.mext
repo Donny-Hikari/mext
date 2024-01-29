@@ -9,28 +9,38 @@
 ## Task
 {@include prompts.task}
 
+{@trim_newline}{@if not empty progress}
 ## Progress
 |step|state|
 |---|---|
 {@for item in progress}
 |{item[name]}|{item[state]}|
 {@endfor}
+{@endif}
 
+{@trim_newline}{@if not empty notes}
 ## Notes
 {@for note in notes}
 - {note[content]}
 {@endfor}
+{@endif}
 
 ## Workspace
+{@if not empty workspace}
 The following files are in the workspace.
 |name|abstract|
 |---|---|
 {@for file in workspace}
 |{file[name]}|{file[abstract]}|
 {@endfor}
+{@else}
+No file in the workspace at the moment.
+{@endif}
 
+{@trim_newline}{@if not empty actions_list}
 ## Actions
 {@include prompts.actions_list actions_list=actions_list}
+{@endif}
 
 ## Instructions
 In the Answer section, response with an Answer object.

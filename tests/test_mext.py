@@ -46,11 +46,20 @@ Empty line at the end.
     parser = MextParser()
     res = parser.parse("""\
 {@option final_strip off}
-{var}
+
 Empty line above.""", {
       'var': "",
     }, use_async=False)
     self.assertEqual(res, "\nEmpty line above.")
+
+    parser = MextParser()
+    res = parser.parse("""\
+{@option final_strip off}
+{var}
+No empty line above.""", {
+      'var': "",
+    }, use_async=False)
+    self.assertEqual(res, "No empty line above.")
 
   def test_set(self):
     parser = MextParser()
@@ -469,6 +478,47 @@ End.
 Start.
 
 Using default value.
+
+End.\
+""")
+
+    res = parser.parse("""\
+Start.
+
+{@trim_newline}{@include prompts.empty_template}
+
+{@trim_newline}{@if true}{@endif}
+
+End.
+""",
+      params={
+        'prompts': self.prompts,
+    }, use_async=False)
+    self.assertEqual(res, """\
+Start.
+
+End.\
+""")
+
+    res = parser.parse("""\
+Start.
+
+{@if false}
+{@else}
+A line.
+{@endif}
+
+{@trim_newline}{@include prompts.empty_template}
+
+End.
+""",
+      params={
+        'prompts': self.prompts,
+    }, use_async=False)
+    self.assertEqual(res, """\
+Start.
+
+A line.
 
 End.\
 """)

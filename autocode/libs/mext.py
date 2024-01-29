@@ -132,13 +132,15 @@ class MextParser:
         'keyword': keyword,
         'statement': statement,
       })
+
       yield self.state
 
   def append_text(self, text, flush_pending=True):
     text = str(text)
     if len(text) > 0:
       if flush_pending and self.pending_whitespaces is not None:
-        self.results.append(self.pending_whitespaces)
+        if len(self.pending_whitespaces) != 0:
+          self.results.append(self.pending_whitespaces)
         self.pending_whitespaces = None
       self.results.append(str(text))
       if self.debug_trace:
@@ -219,21 +221,15 @@ class MextParser:
     whitespaces = r'[ \t]'
 
     text: str = self.state.literal_text
+    pending_whitespaces = None
 
     if self.pending_whitespaces is not None:
       if (m := re.search(fr'\A{whitespaces}*\n', text)) is not None:
-        text = re.sub(fr'\A{whitespaces}*\n', '', text)
+        text = text[len(m[0]):]
         self.pending_whitespaces = re.sub(fr'{whitespaces}*\Z', '', self.pending_whitespaces)
-      if self.state.keyword not in [None] and re.fullmatch(fr'({whitespaces}|\n)*', text) is not None:
-        pass
-      else:
-        self.append_text(self.pending_whitespaces, flush_pending=False)
-      self.pending_whitespaces = None
-
-    if self.state.keyword not in [None] and ((m := re.search(fr'\n{whitespaces}*\Z', text))
-      or (self.pos_index == 0 and (m := re.fullmatch(fr'{whitespaces}*', text)))):
-      text = re.sub(fr'\n{whitespaces}*\Z', '', text)
-      self.pending_whitespaces = m[0]
+        if self.pending_whitespaces.endswith('\n'):
+          text = '\n' + text
+          self.pending_whitespaces = self.pending_whitespaces[:-1]
 
     if len(self.trim_newline_state) > 0:
       if len(text) > 0:
@@ -250,7 +246,16 @@ class MextParser:
             break
           last_state = self.trim_newline_state[-1]
 
-    self.append_text(text, flush_pending=False)
+    if self.pos_index != 0 and len(text) == 0:
+      pending_whitespaces = self.pending_whitespaces
+      self.pending_whitespaces = None
+    elif self.state.field_name is not None and ((m := re.search(fr'\n{whitespaces}*\Z', text))
+          or (self.pos_index == 0 and (m := re.fullmatch(fr'{whitespaces}*', text)))):
+      text = text[:-len(m[0])]
+      pending_whitespaces = m[0]
+
+    self.append_text(text)
+    self.pending_whitespaces = pending_whitespaces
 
   async def parse_option(self):
     self.assert_missing_statement()
@@ -467,7 +472,7 @@ class MextParser:
     self.assert_unexpected_statement()
 
     self.append_text(self.pending_whitespaces, flush_pending=False)
-    self.pending_whitespaces = None
+    self.pending_whitespaces = ''
     self.trim_newline_state.append(ObjDict({
       'level': self.level,
       'pos_mark': len(self.results),
@@ -566,7 +571,6 @@ class Mext:
 
     with open(prompt_source) as f:
       prompt = ''.join(f.readlines())
-    prompt = prompt.strip()
     Mext.PROMPT_CACHE[prompt_source] = prompt
 
     return prompt
