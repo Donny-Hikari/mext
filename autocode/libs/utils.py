@@ -2,6 +2,7 @@ import logging
 import sys
 from typing import Any
 import asyncio
+import os
 
 LOG_STATS = 11
 LOG_VERBOSE = 15
@@ -21,6 +22,9 @@ def setupLogging(logger: logging.Logger, log_level=logging.INFO, format='[%(leve
   logger.addHandler(hout)
 
   logger.setLevel(log_level)
+
+def ensure_folder_exists(fn):
+  os.makedirs(os.path.dirname(fn), exist_ok=True)
 
 def auto_async(func):
   def wrapper(*args, **kwargs):

@@ -3,6 +3,7 @@ import argparse
 
 from autocode.libs.config_loader import CFG
 from autocode.libs.utils import setupLogging, LOG_VERBOSE
+from autocode.libs.utils import ensure_folder_exists
 from autocode.libs.utils import ObjDict
 from autocode.libs.mext import Mext
 
@@ -30,6 +31,7 @@ def main():
     **params,
   )
 
+  ensure_folder_exists(args.output)
   with open(args.output, 'w') as f:
     f.write(prompt)
 
