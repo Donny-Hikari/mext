@@ -5,6 +5,7 @@ from typing import Union, Tuple, Coroutine, Awaitable, Callable
 import asyncio
 from contextlib import contextmanager
 
+from autocode.libs.config_loader import CFG
 from autocode.libs.utils import auto_async
 from autocode.libs.utils import ObjDict
 
@@ -15,6 +16,7 @@ class MextParser:
     'default',
     'include',
     'input',
+    'import',
     'if',
     'else',
     'elif',
@@ -255,7 +257,7 @@ class MextParser:
 
     parts = self.state.statement.split(' ', 1)
     if len(parts) != 2:
-      self.raise_syntax_error('Keyword "option" requries "@option option_name [on|off]" syntax.')
+      self.raise_syntax_error('Keyword "option" requries "@option option_name (on|off)" syntax.')
 
     opt_name = parts[0]
     val = parts[1]
@@ -337,6 +339,25 @@ class MextParser:
     self.append_text(input_val)
     self.locals[varname] = input_val
     self.input_results[varname] = input_val
+
+  async def parse_import(self):
+    self.assert_missing_statement()
+    statement = self.state.statement
+
+    parts = statement.split(' ', 3)
+    import_fn_var = parts[0]
+    import_fn = await self.get_field_value(import_fn_var)
+    if len(parts) == 1:
+      namespace = self.locals
+    elif len(parts) == 3 and parts[1] == 'as':
+      varname = parts[2]
+      namespace = self.locals[varname] = ObjDict({})
+    else:
+      self.raise_syntax_error(f'Keyword "import" requries "@import filename_variable [as varname]" syntax')
+
+    imported_vars = CFG.load_config(import_fn)
+    imported_vars = ObjDict.convert_recursively(imported_vars)
+    namespace.update(imported_vars)
 
   async def parse_if(self):
     self.assert_missing_statement()

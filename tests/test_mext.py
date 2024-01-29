@@ -7,16 +7,23 @@ from autocode.libs.mext import MextParser
 
 class TestMextParser(unittest.TestCase):
   dirs = ObjDict({
-    'prompts': "tests/mext_prompts",
+    'prompts': "tests/mext/prompts",
+    'data': "tests/mext/data",
   })
 
   def __init__(self, *args, **kwargs):
     super().__init__(*args, **kwargs)
 
-    self.prompts = ObjDict({
-      'empty_template': path.join(self.dirs.prompts, "empty.mext"),
-      'template1': path.join(self.dirs.prompts, "include1.mext"),
-    })
+    def add_prefix(prefix, _dict: dict):
+      return {k:path.join(prefix, v) for k,v in _dict.items()}
+
+    self.prompts = ObjDict(add_prefix(self.dirs.prompts, {
+      'empty_template': "empty.mext",
+      'template1': "include1.mext",
+    }))
+    self.data = ObjDict(add_prefix(self.dirs.data, {
+      'data1': 'data1.yaml',
+    }))
 
   def test_var(self):
     parser = MextParser()
@@ -151,6 +158,44 @@ We now know that Alice is 19 year old.\
       'name': "Alice",
       'age': 19,
     })
+
+  def test_import(self):
+    parser = MextParser()
+    res = parser.parse("""\
+{@import data.data1}
+name: {name}
+age: {age}
+""", params={
+      'data': self.data,
+    }, use_async=False)
+    self.assertEqual(res, """\
+name: Alice
+age: 19\
+""")
+
+    res = parser.parse("""\
+{@import data.data1 as agent}
+name: {agent[name]}
+age: {agent[age]}
+""", params={
+      'data': self.data,
+    }, use_async=False)
+    self.assertEqual(res, """\
+name: Alice
+age: 19\
+""")
+
+    res = parser.parse("""\
+{@import data.data1 as agent}
+name: {agent.name}
+age: {agent.age}
+""", params={
+      'data': self.data,
+    }, use_async=False)
+    self.assertEqual(res, """\
+name: Alice
+age: 19\
+""")
 
   def test_if(self):
     parser = MextParser()
