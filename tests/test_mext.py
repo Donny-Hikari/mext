@@ -432,6 +432,37 @@ End.\
 ]\
 """)
 
+  def test_comment(self):
+    parser = MextParser()
+    res = parser.parse("""\
+Comment below.
+{@comment}Here are some comments.{@endcomment}
+{@if true}
+Comment ended.
+{@endif}
+""", use_async=False)
+    self.assertEqual(res, """\
+Comment below.
+Comment ended.\
+""")
+
+    res = parser.parse("""\
+Comment below.
+{@comment}
+Here are some comments.
+{@if true}
+Just some more comments.
+{@endif}
+{@endcomment}
+{@if true}
+Comment ended.
+{@endif}
+""", use_async=False)
+    self.assertEqual(res, """\
+Comment below.
+Comment ended.\
+""")
+
   def test_if_whitespaces(self):
     parser = MextParser()
     res = parser.parse("""\

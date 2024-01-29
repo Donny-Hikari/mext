@@ -23,6 +23,8 @@ class MextParser:
     'endfor',
     'trim_newline',
     'format',
+    'comment',
+    'endcomment',
   ]
   IncLevel = [
     'if',
@@ -463,6 +465,16 @@ class MextParser:
     if asyncio.iscoroutine(format_res):
       format_res = await format_res
     self.append_text(format_res)
+
+  async def parse_comment(self):
+    self.assert_unexpected_statement()
+
+    self.skip_until(['endcomment'], ['comment'], ['endcomment'])
+
+  async def parse_endcomment(self):
+    self.assert_unexpected_statement()
+
+    self.raise_syntax_error(f'Rebundant keyword "endcomment".')
 
   async def parse_field(self):
     field_value = await self.get_field_value(self.state.field_name)
