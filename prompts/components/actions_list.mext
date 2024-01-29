@@ -1,5 +1,5 @@
 The following actions are available.
-{@for action in action_list}
+{@for action in actions_list}
 - name: {action[name]}
   desc: {action[desc]}
   parameters: {@if not empty action[parameters]}

@@ -1,5 +1,6 @@
 import yaml
 import json
+import os
 from collections import namedtuple
 
 class Dict2ObjParser:
@@ -27,16 +28,33 @@ class Dict2ObjParser:
     return namedtuple_obj
 
 class CFG:
+  Extension2FileType = {
+    'json': 'json',
+    'yaml': 'yaml',
+    'yml': 'yaml',
+  }
+
   @classmethod
-  def load_config_as_obj(cls, fn, filetype='yaml'):
+  def load_config_as_obj(cls, fn, filetype='auto'):
     configs = cls.load_config(fn, filetype)
     return Dict2ObjParser().parse(configs)
 
   @classmethod
-  def load_config(cls, fn, filetype='yaml'):
+  def load_config(cls, fn, filetype='auto'):
     with open(fn) as f:
+      if filetype == 'auto':
+        _, ext = os.path.splitext(fn)
+        if ext is None:
+          raise RuntimeError(f'Unable to deduce file type for "{fn}"')
+        ext = ext[1:]
+        if ext not in CFG.Extension2FileType:
+          raise RuntimeError(f'Unknown file extension "{ext}"')
+        filetype = CFG.Extension2FileType[ext]
+
       if filetype == 'json':
         configs = json.load(f)
-      else: # assume yaml
+      elif filetype == 'yaml': # assume yaml
         configs = yaml.safe_load(f)
+      else:
+        raise ValueError(f'Unknown file type "{filetype}"')
     return configs

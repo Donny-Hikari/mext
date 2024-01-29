@@ -1,0 +1,23 @@
+prompts:
+  actions_list: "prompts/components/actions_list.mext"
+profile: You are Alex
+task: Dummy task
+progress:
+  - name: Step 1
+    state: Done
+  - name: Step 2
+    state: Ongoing
+  - name: Step 3
+    state: Todo
+notes:
+  - content: Note 1
+  - content: Note 2
+workspace:
+  - name: main.py
+    abstract: The entry file for the program.
+actions_list:
+  - name: Search the web
+    desc: Search the web for more information
+    parameters:
+      query: string. The query string.
+      date_range: integer. Search for web documents updated within date_range days.
