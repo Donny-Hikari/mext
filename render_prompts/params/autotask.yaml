@@ -1,7 +1,7 @@
 prompts:
+  profile: "prompts/profiles/alex.mext"
   actions_list: "prompts/components/actions_list.mext"
-profile: You are Alex
-task: Dummy task
+  task: "prompts/tasks/dummy/python-regex.mext"
 progress:
   - name: Step 1
     state: Done

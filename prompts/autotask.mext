@@ -1,8 +1,8 @@
 ## Profile
-{profile}
+{@include prompts.profile}
 
 ## Task
-{task}
+{@include prompts.task}
 
 ## Progress
 |step|state|
