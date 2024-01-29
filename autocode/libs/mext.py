@@ -344,16 +344,23 @@ class MextParser:
     self.assert_missing_statement()
     statement = self.state.statement
 
-    parts = statement.split(' ', 3)
-    import_fn_var = parts[0]
-    import_fn = await self.get_field_value(import_fn_var)
-    if len(parts) == 1:
-      namespace = self.locals
-    elif len(parts) == 3 and parts[1] == 'as':
-      varname = parts[2]
-      namespace = self.locals[varname] = ObjDict({})
-    else:
+    parts = re.match(r'^(?:\"(?P<filepath>(?:[^"]|(?<=\\)\")*(?<!\\))\"|(?P<filepath_var>[^"\s]*))(?:\s+as\s+(?P<namespace>.*))?$', statement)
+    if parts is None:
       self.raise_syntax_error(f'Keyword "import" requries "@import filename_variable [as varname]" syntax')
+
+    if parts['filepath'] is not None:
+      import_fn = parts['filepath']
+    elif parts['filepath_var'] is not None:
+      import_fn_var = parts['filepath_var']
+      import_fn = await self.get_field_value(import_fn_var)
+    else:
+      self.raise_error(RuntimeError, "Failed to identify import target.")
+
+    varname = parts['namespace']
+    if varname is None:
+      namespace = self.locals
+    else:
+      namespace = self.locals[varname] = ObjDict({})
 
     imported_vars = CFG.load_config(import_fn)
     imported_vars = ObjDict.convert_recursively(imported_vars)

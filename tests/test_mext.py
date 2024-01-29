@@ -197,6 +197,26 @@ name: Alice
 age: 19\
 """)
 
+    res = parser.parse("""\
+{@import "tests/mext/data/data1.yaml"}
+name: {name}
+age: {age}
+""", use_async=False)
+    self.assertEqual(res, """\
+name: Alice
+age: 19\
+""")
+
+    res = parser.parse("""\
+{@import "tests/mext/data/data1.yaml" as agent}
+name: {agent.name}
+age: {agent.age}
+""", use_async=False)
+    self.assertEqual(res, """\
+name: Alice
+age: 19\
+""")
+
   def test_if(self):
     parser = MextParser()
     res = parser.parse("""{@if true}True{@else}False{@endif}""", use_async=False)
