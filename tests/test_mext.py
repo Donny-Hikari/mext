@@ -27,7 +27,7 @@ class TestMextParser(unittest.TestCase):
 
   def test_var(self):
     parser = MextParser()
-    res = parser.parse("""{var}""", {
+    res = parser.parse("""{var}""", params={
       'var': "Pass",
     }, use_async=False)
     self.assertEqual(res, "Pass")
@@ -47,7 +47,7 @@ Empty line at the end.
     res = parser.parse("""\
 {@option final_strip off}
 
-Empty line above.""", {
+Empty line above.""", params={
       'var': "",
     }, use_async=False)
     self.assertEqual(res, "\nEmpty line above.")
@@ -56,7 +56,7 @@ Empty line above.""", {
     res = parser.parse("""\
 {@option final_strip off}
 {var}
-No empty line above.""", {
+No empty line above.""", params={
       'var': "",
     }, use_async=False)
     self.assertEqual(res, "No empty line above.")
@@ -66,7 +66,7 @@ No empty line above.""", {
     res = parser.parse("""\
 {var1}
 {@set var1 var2}
-{var1}""", {
+{var1}""", params={
       'var1': "Val1",
       'var2': "Val2",
     }, use_async=False)
@@ -76,14 +76,14 @@ No empty line above.""", {
     parser = MextParser()
     res = parser.parse("""\
 {@default var1 var2}
-{var1}""", {
+{var1}""", params={
       'var2': "Val2",
     }, use_async=False)
     self.assertEqual(res, "Val2")
 
     res = parser.parse("""\
 {@default var1 var2}
-{var1}""", {
+{var1}""", params={
       'var1': "Val1",
       'var2': "Val2",
     }, use_async=False)
@@ -234,30 +234,30 @@ age: 19\
     res = parser.parse("""{@if false}True{@else}False{@endif}""", use_async=False)
     self.assertEqual(res, "False")
 
-    res = parser.parse("""{@if var_true}True{@else}False{@endif}""", {
+    res = parser.parse("""{@if var_true}True{@else}False{@endif}""", params={
       'var_true': True,
     }, use_async=False)
     self.assertEqual(res, "True")
 
-    res = parser.parse("""{@if var_true}{val_pass}{@else}Failed{@endif}""", {
+    res = parser.parse("""{@if var_true}{val_pass}{@else}Failed{@endif}""", params={
       'var_true': True,
       'val_pass': "Pass",
     }, use_async=False)
     self.assertEqual(res, "Pass")
 
-    res = parser.parse("""{@if var_false}Failed{@else}{val_pass}{@endif}""", {
+    res = parser.parse("""{@if var_false}Failed{@else}{val_pass}{@endif}""", params={
       'var_false': False,
       'val_pass': "Pass",
     }, use_async=False)
     self.assertEqual(res, "Pass")
 
-    res = parser.parse("""{@if not var_true}Failed{@else}{val_pass}{@endif}""", {
+    res = parser.parse("""{@if not var_true}Failed{@else}{val_pass}{@endif}""", params={
       'var_true': True,
       'val_pass': "Pass",
     }, use_async=False)
     self.assertEqual(res, "Pass")
 
-    res = parser.parse("""{@if not var_true}Failed{@else}{@if false}Nested Failed{@else}{val_pass}{@endif}{@endif}""", {
+    res = parser.parse("""{@if not var_true}Failed{@else}{@if false}Nested Failed{@else}{val_pass}{@endif}{@endif}""", params={
       'var_true': True,
       'val_pass': "Pass",
     }, use_async=False)
@@ -275,7 +275,7 @@ age: 19\
       ('a', False),
     ]
     for var, expected in cases:
-      res = parser.parse(""""{var}" is {@if empty var}empty{@else}not empty{@endif}""", {
+      res = parser.parse(""""{var}" is {@if empty var}empty{@else}not empty{@endif}""", params={
         'var': var,
       }, use_async=False)
       self.assertEqual(res, f'"{var}" is ' + ("empty" if expected else "not empty"))
@@ -584,7 +584,7 @@ Comment ended.\
 {@if true}
 {val_pass}
 {@endif}
-""", {
+""", params={
       'var_true': True,
       'val_pass': "Pass",
     }, use_async=False)
@@ -595,7 +595,7 @@ Is
 {@if true}
 {val_pass}
 {@endif}
-""", {
+""", params={
       'var_true': True,
       'val_pass': "Pass",
     }, use_async=False)
@@ -605,7 +605,7 @@ Is
 Is {@if true}
 {val_pass}
 {@endif}
-""", {
+""", params={
       'var_true': True,
       'val_pass': "Pass",
     }, use_async=False)
@@ -619,7 +619,7 @@ Nested Failed
   {@else}{val_pass}
   {@endif}
 {@endif}
-""", {
+""", params={
       'var_true': True,
       'val_pass': "Pass",
     }, use_async=False)
@@ -634,7 +634,7 @@ Nested Failed
   {@else}{val_pass}
   {@endif}
 {@endif}
-""", {
+""", params={
       'var_true': True,
       'val_pass': "Pass",
     }, use_async=False)
@@ -648,7 +648,7 @@ Failed
   {@else}{val_pass}
   {@endif}
 {@endif}
-""", {
+""", params={
       'var_true': True,
       'val_pass': "Pass",
     }, use_async=False)
@@ -662,7 +662,7 @@ Failed
   {val_pass}
   {@endif}
 {@endif}
-""", {
+""", params={
       'var_true': True,
       'val_pass': "Pass",
     }, use_async=False)
@@ -675,7 +675,7 @@ Failed
 Nested Failed{@else}{val_pass}
   {@endif}
 {@endif}
-""", {
+""", params={
       'var_true': True,
       'val_pass': "Pass",
     }, use_async=False)
@@ -686,7 +686,7 @@ Is {@if not var_true}
 Failed
 {@else}{@if false}Nested Failed{@else}{val_pass}{@endif}
 {@endif}
-""", {
+""", params={
       'var_true': True,
       'val_pass': "Pass",
     }, use_async=False)
@@ -701,7 +701,7 @@ Failed
   {val_pass}
   {@endif}
 {@endif}
-""", {
+""", params={
       'var_true': True,
       'val_pass': "Pass",
     }, use_async=False)
@@ -717,7 +717,7 @@ Failed
     {val_pass}
   {@endif}
 {@endif}
-""", {
+""", params={
       'var_true': True,
       'val_pass': "Pass",
     }, use_async=False)
@@ -729,7 +729,7 @@ Failed
 {@else}
   {@if false}Nested Failed{@else}{val_pass}{@endif}
 {@endif}
-""", {
+""", params={
       'var_true': True,
       'val_pass': "\nPass",
     }, use_async=False)

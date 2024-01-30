@@ -4,6 +4,7 @@ from string import Formatter
 from typing import Union, Tuple, Coroutine, Awaitable, Callable
 import asyncio
 from contextlib import contextmanager
+from os import path
 
 from mext.libs.config_loader import CFG
 from mext.libs.utils import auto_async
@@ -57,6 +58,7 @@ class MextParser:
 
   def reset(self):
     self.template = None
+    self.template_fn = None
     self.entries = None
     self.pos_index = -1
     self.str_formatter = Formatter()
@@ -106,10 +108,17 @@ class MextParser:
       lines = f.readlines()
       return ''.join(lines)
 
-  def set_template(self, template):
+  def set_template(self, template=None, template_fn=None):
+    if template is None:
+      if template_fn is not None:
+        template = self.template_loader(template_fn)
+      else:
+        raise ValueError('One of "template" or "template_fn" must not be None.')
+
     self.reset()
 
     self.template = template
+    self.template_fn = template_fn
     entries = self.str_formatter.parse(self.template)
     self.entries = list(entries)
 
@@ -192,12 +201,12 @@ class MextParser:
     return field_value
 
   @auto_async
-  async def parse(self, template, params={}, callbacks={}, template_loader=None):
-    self.set_template(template)
-    self.params = params
-    self.callbacks = callbacks
+  async def parse(self, template=None, params={}, callbacks={}, template_fn=None, template_loader=None):
     if template_loader is not None:
       self.template_loader = template_loader
+    self.set_template(template=template, template_fn=template_fn)
+    self.params = params
+    self.callbacks = callbacks
 
     for state in self.next_component():
       self.process_literal()
@@ -366,6 +375,9 @@ class MextParser:
       namespace = self.locals
     else:
       namespace = self.locals[varname] = ObjDict({})
+
+    if not path.exists(import_fn):
+      import_fn = path.join(path.dirname(self.template_fn), import_fn)
 
     imported_vars = CFG.load_config(import_fn)
     imported_vars = ObjDict.convert_recursively(imported_vars)
@@ -545,10 +557,10 @@ class Mext:
     self.set_params(**old_params)
 
   def set_template(self, template=None, template_fn=None):
-    if template is not None:
-      self.template = template
-    elif template_fn is not None:
-      self.template = self._load_template(template_fn)
+    if template_fn is not None:
+      template = self._load_template(template_fn)
+    self.template = template
+    self.template_fn = template_fn
 
   def clear_template(self):
     self.template = ""
@@ -585,12 +597,9 @@ class Mext:
     @input_{ARGNAME} Call callbacks[ARGNAME] with the string composed up to this point to get the value if ARGNAME is not provided as a param. Or else use param[ARGNAME].
     @include_{FILEARG} Compose using template_fn=params[FILEARG] first.
     """
-    cur_template = self.template
-
-    if template is not None:
-      cur_template = template
-    elif template_fn is not None:
-      cur_template = self._load_template(template_fn)
+    if template is None and template_fn is None:
+      template = self.template
+      template_fn = self.template_fn
 
     all_kwargs = {
       **self.params,
@@ -598,7 +607,7 @@ class Mext:
     }
 
     parser = MextParser()
-    parsed_result = await parser.parse(template=cur_template, params=all_kwargs, callbacks=callbacks, template_loader=self._load_template)
+    parsed_result = await parser.parse(template=template, template_fn=template_fn, params=all_kwargs, callbacks=callbacks, template_loader=self._load_template)
 
     if callbacks is None:
       return parsed_result
