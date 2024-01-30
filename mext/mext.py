@@ -5,6 +5,7 @@ from string import Formatter
 from contextlib import contextmanager
 import asyncio
 from typing import Union, Tuple, Coroutine, Awaitable, Callable
+import traceback
 
 from mext.libs.config_loader import CFG
 from mext.libs.utils import auto_async
@@ -175,7 +176,13 @@ class MextParser:
         return
 
   def raise_error(self, error_type, msg):
-    raise error_type(f'Around "{self.state.field_name}": {msg}')
+    error_msg = ""
+    if self.template_fn is not None:
+      error_msg += f'In file "{self.template_fn}", around "{self.state.field_name}".'
+    else:
+      error_msg += f'Around "{self.state.field_name}".'
+    error_msg += f'\n  {msg}'
+    raise error_type(error_msg)
 
   def raise_syntax_error(self, msg):
     self.raise_error(SyntaxError, msg)
@@ -193,11 +200,10 @@ class MextParser:
       return int(field_name)
     if re.match(r'^[-+]?(\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?$', field_name):
       return float(field_name)
-    field_value, _ = self.str_formatter.get_field(field_name, args=[], kwargs=self.all_variables)
-    if callable(field_value):
-      field_value = field_value()
-      if asyncio.iscoroutine(field_value):
-        field_value = await field_value
+    try:
+      field_value, _ = self.str_formatter.get_field(field_name, args=[], kwargs=self.all_variables)
+    except Exception as e:
+      self.raise_error(RuntimeError, ''.join(traceback.format_exception_only(type(e), e)).strip())
     return field_value
 
   @auto_async
@@ -473,8 +479,11 @@ class MextParser:
 
     try:
       iterable = await self.get_field_value(iterable_name)
-      itr = iter(iterable)
-    except ValueError:
+      if isinstance(iterable, dict):
+        itr = iter(map(lambda x: type('dict_item', (), { 'key': x[0], 'val': x[1] })(), iterable.items()))
+      else:
+        itr = iter(iterable)
+    except TypeError:
       self.raise_error(RuntimeError, f'"{iterable_name}" is not an iterable.')
 
     try:

@@ -344,8 +344,8 @@ Purchase them in the store.\
 """)
 
     res = parser.parse("""\
-{@for item in dict.items}
-{item[0]}: {item[1]}
+{@for item in dict}
+{item.key}: {item.val}
 {@endfor}
 """,
       params={
@@ -383,7 +383,7 @@ lines\
     res = parser.parse("""\
 {@for item in arr}
 {@if item[pass]}
-- {@for v in item.items}{v[0]}: {v[1]}
+- {@for v in item}{v.key}: {v.val}
   {@endfor}
 {@endif}
 {@endfor}
