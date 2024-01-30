@@ -1,0 +1,9 @@
+syntaxes:
+  - name: if
+    template: tests/mext/readme/if.mext
+    params: tests/mext/readme/if.yaml
+    result: tests/mext/readme/if.md
+  - name: for
+    template: tests/mext/readme/for.mext
+    params: tests/mext/readme/for.yaml
+    result: tests/mext/readme/for.md

@@ -1,0 +1,87 @@
+# Mext
+
+Mext is an prompt template extension for LLM (large language model).
+
+## Syntax
+
+### if
+
+Template:
+```mext
+{@import "if.yaml"}
+
+{@if true}
+This will be shown.
+{@endif}
+
+{@if not empty var}
+{var}
+{@endif}
+```
+
+Given params:
+```json
+{
+  "var": "Text from variable."
+}
+```
+
+Produce:
+```markdown
+This will be shown.
+
+Text from variable.
+```
+### for
+
+Template:
+```mext
+{@import "for.yaml"}
+
+## Array
+{@for item in arr}
+- name: {item[name]}
+  content: {item[content]}
+{@endfor}
+
+## Dictionary
+{@for item in dict.items}
+- key: {item[0]}
+  val: {item[1]}
+{@endfor}
+```
+
+Given params:
+```json
+{
+  "arr": [
+    {
+      "name": "Item 1",
+      "content": "Content 1"
+    },
+    {
+      "name": "Item 2",
+      "content": "Content 2"
+    }
+  ],
+  "dict": {
+    "key1": "Value 1",
+    "key2": "Value 2"
+  }
+}
+```
+
+Produce:
+```markdown
+## Array
+- name: Item 1
+  content: Content 1
+- name: Item 2
+  content: Content 2
+
+## Dictionary
+- key: key1
+  val: Value 1
+- key: key2
+  val: Value 2
+```

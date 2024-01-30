@@ -1,0 +1,8 @@
+arr:
+  - name: Item 1
+    content: Content 1
+  - name: Item 2
+    content: Content 2
+dict:
+  key1: Value 1
+  key2: Value 2

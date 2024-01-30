@@ -1,0 +1,29 @@
+{@import "README.yaml"}
+
+# Mext
+
+Mext is an prompt template extension for LLM (large language model).
+
+## Syntax
+
+{@for syntax in syntaxes}
+### {syntax[name]}
+
+Template:
+```mext
+{@import syntax[template] as template}
+{template}
+```
+
+Given params:
+```json
+{@import syntax[params] as params}
+{@format json params}
+```
+
+Produce:
+```markdown
+{@import syntax[result] as result}
+{result}
+```
+{@endfor}

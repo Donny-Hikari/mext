@@ -1,0 +1,9 @@
+{@import "if.yaml"}
+
+{@if true}
+This will be shown.
+{@endif}
+
+{@if not empty var}
+{var}
+{@endif}

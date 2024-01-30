@@ -1,0 +1,13 @@
+{@import "for.yaml"}
+
+## Array
+{@for item in arr}
+- name: {item[name]}
+  content: {item[content]}
+{@endfor}
+
+## Dictionary
+{@for item in dict.items}
+- key: {item[0]}
+  val: {item[1]}
+{@endfor}
