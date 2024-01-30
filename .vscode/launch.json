@@ -5,12 +5,34 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Render mext",
+      "type": "python",
+      "request": "launch",
+      "module": "tools.render_mext",
+      "args": [
+        "${file}"
+      ],
+      "justMyCode": true
+    },
+    {
       "name": "Test Mext",
       "type": "python",
       "request": "launch",
       "module": "unittest",
       "args": [
         "tests.test"
+      ],
+      "justMyCode": true
+    },
+    {
+      "name": "Generate README",
+      "type": "python",
+      "request": "launch",
+      "module": "tools.render_mext",
+      "args": [
+        "README.mext",
+        "-o",
+        "README"
       ],
       "justMyCode": true
     }
