@@ -138,7 +138,7 @@ class MextParser:
       if field_name is not None and field_name.startswith("@"):
         parts = field_name[1:].split(' ', 1)
         keyword = parts[0]
-        statement = parts[1] if len(parts) > 1 else None
+        statement = parts[1].strip() if len(parts) > 1 else None
       self.state.update({
         'literal_text': literal_text,
         'field_name': field_name,
@@ -429,23 +429,17 @@ class MextParser:
     self.assert_missing_statement()
     statement = self.state.statement
 
-    parts = statement.split(' ', 1)
-    inverse = False
-    if parts[0] == 'not':
-      if len(parts) == 1:
-        self.raise_syntax_error('Missing statement after keyword "not".')
-      inverse = True
-      statement = parts[1]
+    reg = MextParser.RegExps
+    parts = re.match(fr'(?P<operators>(not\s+)?(empty\s+)?)(?P<varname>{reg.variable})', statement)
+    if parts is None:
+      self.raise_syntax_error(f'Keyword "if" requires "@if [not|empty] varname" syntax.')
 
-    parts = statement.split(' ', 1)
-    test_empty = False
-    if parts[0] == 'empty':
-      if len(parts) == 1:
-        self.raise_syntax_error('Missing statement after keyword "empty".')
-      test_empty = True
-      statement = parts[1]
+    operators = parts['operators']
+    operators = re.split(r'\s+', operators)
+    inverse = 'not' in operators
+    test_empty = 'empty' in operators
 
-    field_name = statement
+    field_name = parts['varname']
     field_value = await self.get_field_value(field_name)
     if test_empty:
       if field_value is None:
@@ -557,7 +551,7 @@ class MextParser:
     format = parts[0]
     if len(parts) == 1:
       self.raise_syntax_error('Misssing statement, keyword "format" requires a format and an variable.')
-    statement = parts[1]
+    statement = parts[1].strip()
 
     field_name = statement
     field_value = await self.get_field_value(field_name)
