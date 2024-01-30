@@ -7,7 +7,7 @@
 {@endfor}
 
 ## Dictionary
-{@for item in dict.items}
-- key: {item[0]}
-  val: {item[1]}
+{@for item_key, item_val in dict}
+- key: {item_key}
+  val: {item_val}
 {@endfor}

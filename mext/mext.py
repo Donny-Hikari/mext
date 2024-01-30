@@ -45,6 +45,11 @@ class MextParser:
     'none': None,
   }
 
+  RegExps = ObjDict({
+    'string': r'(?:[^\"\\]|\\.)*',
+    'variable': r'[0-9a-zA-Z_.\[\]]+',
+  })
+
   def __init__(self):
     self.reset()
 
@@ -322,7 +327,8 @@ class MextParser:
     self.assert_missing_statement()
     statement = self.state.statement
 
-    parts = re.match(r'^(?:\"(?P<filepath>(?:[^\"]|(?<=\\)\")*(?<!\\))\"|(?P<filepath_var>[^"\s]*))(?:\s+(?P<params>(?:[^=\s]*=[^=\s]*)(?:,\s*[^=\s]*=[^=\s]*)*))?$', statement)
+    reg = MextParser.RegExps
+    parts = re.match(fr'^(?:\"(?P<filepath>{reg.string})\"|(?P<filepath_var>{reg.variable}))(?:\s+(?P<params>(?:{reg.variable}={reg.variable})(?:,\s*{reg.variable}={reg.variable})*))?$', statement)
     if parts is None:
       self.raise_syntax_error(f'Keyword "include" requries \'@include ("filename"|filename_variable) [param=var,...]\' syntax.')
 
@@ -383,7 +389,8 @@ class MextParser:
     self.assert_missing_statement()
     statement = self.state.statement
 
-    parts = re.match(r'^(?:\"(?P<filepath>(?:[^\"]|(?<=\\)\")*(?<!\\))\"|(?P<filepath_var>[^"\s]*))(?:\s+as\s+(?P<namespace>.*))?$', statement)
+    reg = MextParser.RegExps
+    parts = re.match(fr'^(?:\"(?P<filepath>{reg.string})\"|(?P<filepath_var>{reg.variable}))(?:\s+as\s+(?P<namespace>.*))?$', statement)
     if parts is None:
       self.raise_syntax_error(f'Keyword "import" requries \'@import ("filename"|filename_variable) [as varname]\' syntax.')
 
@@ -469,18 +476,21 @@ class MextParser:
 
   async def parse_for(self):
     self.assert_missing_statement()
+    statement = self.state.statement
 
-    parts = self.state.statement.split(' ', 3)
-    if len(parts) != 3:
+    reg = MextParser.RegExps
+    parts = re.match(fr'(?P<varnames>{reg.variable}(,\s*{reg.variable})*)\s+in\s+(?P<iterable_name>{reg.variable})', statement)
+    if parts is None:
       self.raise_syntax_error('Keyword "for" requires "@for item in iterable" syntax.')
 
-    varname = parts[0]
-    iterable_name = parts[2]
+    varnames = parts['varnames']
+    varnames = list(map(lambda x: x.strip(), varnames.split(',')))
+    iterable_name = parts['iterable_name']
 
     try:
       iterable = await self.get_field_value(iterable_name)
       if isinstance(iterable, dict):
-        itr = iter(map(lambda x: type('dict_item', (), { 'key': x[0], 'val': x[1] })(), iterable.items()))
+        itr = iter(iterable.items())
       else:
         itr = iter(iterable)
     except TypeError:
@@ -489,14 +499,19 @@ class MextParser:
     try:
       current_value = next(itr)
       context = ObjDict({
-        'varname': varname,
+        'varnames': varnames,
         'current_value': current_value,
         'itr': itr,
         'index': 0,
         'entry_mark': self.pos_index,
       })
       self.for_context.append(context)
-      self.locals[varname] = current_value
+      if len(varnames) == 1:
+        self.locals[varnames[0]] = current_value
+      else:
+        _ = iter(current_value)
+        for varname,value in zip(varnames, current_value):
+          self.locals[varname] = value
     except StopIteration:
       pass
 
@@ -508,12 +523,18 @@ class MextParser:
 
     try:
       context = self.for_context[-1]
+      varnames = context.varnames
       current_value = next(context.itr)
       context.update({
         'current_value': current_value,
         'index': context.index+1,
       })
-      self.locals[context.varname] = current_value
+      if len(varnames) == 1:
+        self.locals[varnames[0]] = current_value
+      else:
+        _ = iter(current_value)
+        for varname,value in zip(varnames, current_value):
+          self.locals[varname] = value
       self.pos_index = context.entry_mark
     except StopIteration:
       self.for_context.pop()
