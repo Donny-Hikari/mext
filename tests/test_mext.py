@@ -2,8 +2,8 @@
 import unittest
 from os import path
 
-from autocode.libs.utils import ObjDict
-from autocode.libs.mext import MextParser
+from mext.libs.utils import ObjDict
+from mext import MextParser
 
 class TestMextParser(unittest.TestCase):
   dirs = ObjDict({

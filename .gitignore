@@ -1,4 +1,2 @@
-__pycache__
-
-credentials
-outputs
+__pycache__/
+tools/

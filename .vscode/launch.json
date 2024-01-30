@@ -5,30 +5,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Render mext",
-      "type": "python",
-      "request": "launch",
-      "module": "tools.render_mext",
-      "args": [
-        "${file}",
-        "-o",
-        "render_prompts/outputs/${fileBasenameNoExtension}.md"
-      ],
-      "justMyCode": true
-    },
-    {
-      "name": "Autocode",
-      "type": "python",
-      "request": "launch",
-      "module": "autocode.main",
-      "args": [
-        "-c",
-        "configs/autocode.yaml"
-      ],
-      "justMyCode": true
-    },
-    {
-      "name": "Test Autocode",
+      "name": "Test Mext",
       "type": "python",
       "request": "launch",
       "module": "unittest",

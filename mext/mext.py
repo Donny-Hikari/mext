@@ -5,9 +5,9 @@ from typing import Union, Tuple, Coroutine, Awaitable, Callable
 import asyncio
 from contextlib import contextmanager
 
-from autocode.libs.config_loader import CFG
-from autocode.libs.utils import auto_async
-from autocode.libs.utils import ObjDict
+from mext.libs.config_loader import CFG
+from mext.libs.utils import auto_async
+from mext.libs.utils import ObjDict
 
 class MextParser:
   Keywords = [
