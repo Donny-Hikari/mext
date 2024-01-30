@@ -390,7 +390,7 @@ class MextParser:
     statement = self.state.statement
 
     reg = MextParser.RegExps
-    parts = re.match(fr'^(?:\"(?P<filepath>{reg.string})\"|(?P<filepath_var>{reg.variable}))(?:\s+as\s+(?P<namespace>.*))?$', statement)
+    parts = re.match(fr'^(?:\"(?P<filepath>{reg.string})\"|(?P<filepath_var>{reg.variable}))(?:\s+as\s+(?P<namespace>{reg.variable}))?$', statement)
     if parts is None:
       self.raise_syntax_error(f'Keyword "import" requries \'@import ("filename"|filename_variable) [as varname]\' syntax.')
 
@@ -412,6 +412,8 @@ class MextParser:
     if path.splitext(import_fn)[1] in CFG.supported_extensions:
       imported_vars = CFG.load_config(import_fn)
       imported_vars = ObjDict.convert_recursively(imported_vars)
+      if imported_vars is None:
+        imported_vars = {}
 
       if varname is None:
         self.locals.update(imported_vars)
@@ -641,7 +643,7 @@ class Mext:
     return prompt
 
   @auto_async
-  async def compose(self, template=None, template_fn=None, callbacks=None,
+  async def compose(self, template=None, template_fn=None, callbacks={},
       **kwargs) -> Union[str, Tuple[str, dict]]:
     """
     The template will be formatted using the params provided.
@@ -662,7 +664,7 @@ class Mext:
     parser = MextParser()
     parsed_result = await parser.parse(template=template, template_fn=template_fn, params=all_kwargs, callbacks=callbacks, template_loader=self._load_template)
 
-    if callbacks is None:
+    if len(callbacks) == 0:
       return parsed_result
     else:
       return parsed_result, parser.input_results
