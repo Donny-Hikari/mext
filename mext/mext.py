@@ -47,7 +47,7 @@ class MextParser:
 
   RegExps = ObjDict({
     'string': r'(?:[^\"\\]|\\.)*',
-    'variable': r'[0-9a-zA-Z_.\[\]]+',
+    'variable': r'[0-9a-zA-Z_\-\.\[\]]+',
   })
 
   def __init__(self):
@@ -70,6 +70,7 @@ class MextParser:
     self.str_formatter = Formatter()
 
     self.state = ObjDict()
+    self.linenumbers = [1]
     self.level = 0
     self.pending_whitespaces = None
 
@@ -139,6 +140,8 @@ class MextParser:
         parts = field_name[1:].split(' ', 1)
         keyword = parts[0]
         statement = parts[1].strip() if len(parts) > 1 else None
+
+      self.linenumbers.append(self.linenumbers[-1] + literal_text.count('\n'))
       self.state.update({
         'literal_text': literal_text,
         'field_name': field_name,
@@ -149,6 +152,17 @@ class MextParser:
       })
 
       yield self.state
+
+  def seek(self, to_pos=None, delta=None):
+    if to_pos is not None:
+      delta = to_pos - self.pos_index
+    if delta is not None:
+      if delta > 0:
+        raise ValueError('Cannot seek forward.')
+      self.pos_index += delta
+      self.linenumbers = self.linenumbers[:delta]
+    else:
+      raise ValueError('One of "to_pos" or "delta" must not be None.')
 
   def append_text(self, text, flush_pending=True):
     text = str(text)
@@ -183,9 +197,9 @@ class MextParser:
   def raise_error(self, error_type, msg):
     error_msg = ""
     if self.template_fn is not None:
-      error_msg += f'In file "{self.template_fn}", around "{self.state.field_name}".'
+      error_msg += f'In file "{self.template_fn}", line {self.linenumbers[-1]}, around "{self.state.field_name}".'
     else:
-      error_msg += f'Around "{self.state.field_name}".'
+      error_msg += f'Line {self.linenumbers[-1]}, around "{self.state.field_name}".'
     error_msg += f'\n  {msg}'
     raise error_type(error_msg)
 
@@ -531,7 +545,7 @@ class MextParser:
         _ = iter(current_value)
         for varname,value in zip(varnames, current_value):
           self.locals[varname] = value
-      self.pos_index = context.entry_mark
+      self.seek(to_pos=context.entry_mark)
     except StopIteration:
       self.for_context.pop()
 
