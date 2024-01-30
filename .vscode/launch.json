@@ -8,7 +8,7 @@
       "name": "Render mext",
       "type": "python",
       "request": "launch",
-      "module": "tools.render_mext",
+      "module": "mext.scripts.render_mext",
       "args": [
         "${file}"
       ],

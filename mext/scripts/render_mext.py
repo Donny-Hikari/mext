@@ -3,7 +3,6 @@ import argparse
 from os import path
 
 from mext.libs.config_loader import CFG
-from mext.libs.utils import setupLogging, LOG_VERBOSE
 from mext.libs.utils import ensure_folder_exists
 from mext.libs.utils import ObjDict
 from mext.mext import Mext
@@ -16,7 +15,7 @@ def parse_args(argv=sys.argv[1:]):
   args = parser.parse_args(argv)
   return args
 
-def main():
+def render_mext():
   args = parse_args()
   context_mgr = Mext()
 
@@ -40,4 +39,4 @@ def main():
       f.write(prompt)
 
 if __name__ == "__main__":
-  main()
+  render_mext()
