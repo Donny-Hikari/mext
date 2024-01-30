@@ -24,7 +24,9 @@ def setupLogging(logger: logging.Logger, log_level=logging.INFO, format='[%(leve
   logger.setLevel(log_level)
 
 def ensure_folder_exists(fn):
-  os.makedirs(os.path.dirname(fn), exist_ok=True)
+  folder = os.path.dirname(fn)
+  if folder != '':
+    os.makedirs(folder, exist_ok=True)
 
 def auto_async(func):
   def wrapper(*args, **kwargs):

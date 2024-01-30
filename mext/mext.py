@@ -1,10 +1,10 @@
 import re
 import json
-from string import Formatter
-from typing import Union, Tuple, Coroutine, Awaitable, Callable
-import asyncio
-from contextlib import contextmanager
 from os import path
+from string import Formatter
+from contextlib import contextmanager
+import asyncio
+from typing import Union, Tuple, Coroutine, Awaitable, Callable
 
 from mext.libs.config_loader import CFG
 from mext.libs.utils import auto_async
@@ -360,8 +360,9 @@ class MextParser:
 
     parts = re.match(r'^(?:\"(?P<filepath>(?:[^\"]|(?<=\\)\")*(?<!\\))\"|(?P<filepath_var>[^"\s]*))(?:\s+as\s+(?P<namespace>.*))?$', statement)
     if parts is None:
-      self.raise_syntax_error(f'Keyword "import" requries "@import filename_variable [as varname]" syntax')
+      self.raise_syntax_error(f'Keyword "import" requries \'@import ("filename"|filename_variable) [as varname]\' syntax.')
 
+    import_fn = None
     if parts['filepath'] is not None:
       import_fn = parts['filepath']
     elif parts['filepath_var'] is not None:
@@ -371,17 +372,26 @@ class MextParser:
       self.raise_error(RuntimeError, "Failed to identify import target.")
 
     varname = parts['namespace']
-    if varname is None:
-      namespace = self.locals
-    else:
-      namespace = self.locals[varname] = ObjDict({})
 
     if not path.exists(import_fn):
       import_fn = path.join(path.dirname(self.template_fn), import_fn)
 
-    imported_vars = CFG.load_config(import_fn)
-    imported_vars = ObjDict.convert_recursively(imported_vars)
-    namespace.update(imported_vars)
+    if path.splitext(import_fn)[1] in CFG.supported_extensions:
+      imported_vars = CFG.load_config(import_fn)
+      imported_vars = ObjDict.convert_recursively(imported_vars)
+
+      if varname is None:
+        namespace = self.locals
+      else:
+        namespace = self.locals[varname] = ObjDict({})
+      namespace.update(imported_vars)
+    else:
+      if varname is None:
+        self.raise_syntax_error(f'Trying to import file "{import_fn}" as text but missing the as clause. Usage: \'@import "text_file" as varname\'.')
+      with open(import_fn, 'r') as f:
+        lines = f.readlines()
+        imported_content = ''.join(lines)
+        self.locals[varname] = imported_content
 
   async def parse_if(self):
     self.assert_missing_statement()

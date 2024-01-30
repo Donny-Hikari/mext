@@ -1,5 +1,5 @@
-
 import unittest
+import os
 from os import path
 
 from mext.libs.utils import ObjDict
@@ -9,6 +9,7 @@ class TestMextParser(unittest.TestCase):
   dirs = ObjDict({
     'prompts': "tests/mext/prompts",
     'data': "tests/mext/data",
+    'readme': "tests/mext/readme",
   })
 
   def __init__(self, *args, **kwargs):
@@ -777,3 +778,18 @@ End of the empty template.
 Include an empty template:
 End of the empty template.\
 """)
+
+  def test_readme(self):
+    parser = MextParser()
+    readme_files = os.listdir(self.dirs.readme)
+    readme_templates = filter(lambda x: x.endswith('.mext'), readme_files)
+    for tp in readme_templates:
+      template_fn = path.join(self.dirs.readme, tp)
+      tp_base, tp_ext = path.splitext(tp)
+      expected_fn = path.join(self.dirs.readme, f'{tp_base}.md')
+      with open(expected_fn, 'r') as f:
+        lines = f.readlines()
+        expected_result = ''.join(lines)
+
+      res = parser.parse(template_fn=template_fn, use_async=False)
+      self.assertEqual(res, expected_result)
