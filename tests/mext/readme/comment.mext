@@ -1,0 +1,4 @@
+@comment will not be shown in the result.
+{@comment}
+This will be ignored.
+{@endcomment}

@@ -1,0 +1,16 @@
+@default will not overwrite the variable.
+{@default var false}
+{@if var}
+var is true.
+{@else}
+var is false.
+{@endif}
+
+When the variable exists:
+{@import "default.yaml"}
+{@default var false}
+{@if var}
+var is true.
+{@else}
+var is false.
+{@endif}

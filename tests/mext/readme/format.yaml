@@ -1,0 +1,6 @@
+var:
+  abstract: List of fruits to purchase.
+  fruits:
+    - apple
+    - banana
+    - pear

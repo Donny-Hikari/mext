@@ -1,0 +1,3 @@
+@option controls the behavior of the parser.
+{@option final_strip off}
+This will keep the empty line below.

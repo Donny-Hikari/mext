@@ -1,0 +1,34 @@
+syntaxes:
+  - name: if
+    ignored_mext: False
+    has_input: True
+  - name: for
+    ignored_mext: False
+    has_input: True
+  - name: trim_newline
+    ignored_mext: False
+    has_input: False
+  - name: format
+    ignored_mext: False
+    has_input: True
+  - name: import
+    ignored_mext: False
+    has_input: True
+  - name: include
+    ignored_mext: False
+    has_input: False
+  - name: input
+    ignored_mext: True
+    has_input: False
+  - name: option
+    ignored_mext: False
+    has_input: False
+  - name: set
+    ignored_mext: False
+    has_input: True
+  - name: default
+    ignored_mext: False
+    has_input: True
+  - name: comment
+    ignored_mext: False
+    has_input: False

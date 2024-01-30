@@ -1,0 +1,8 @@
+{@import "set.yaml"}
+@set will overwrite the variable.
+{@set var false}
+{@if var}
+var is true.
+{@else}
+var is false.
+{@endif}

@@ -1,0 +1,26 @@
+@import variables from a file.
+File ends with 'yaml' or 'json' will automatically be loaded as an object. When 'as' clause is present, the object will be loaded as a variable.
+```
+{@import "import.yaml" as imported}
+{@format json imported}
+```
+
+If no 'as' clause is given, first level members of the object will be loaded into the local namespace.
+```
+{@import "import.yaml"}
+{imported_var}
+```
+
+Other file type will be loaded as a string variable. Note you must specify the 'as' clause in this case.
+Loaded from "default.mext":
+```
+{@import "default.mext" as default_mext}
+{default_mext}
+```
+
+Using variable as filename is also possible.
+Loaded from "set.mext":
+```
+{@import imported.set_mext_fn as set_mext}
+{set_mext}
+```

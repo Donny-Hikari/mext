@@ -1,0 +1,15 @@
+{@import "README-yaml.yaml"}
+syntaxes:
+  {@for syntax in syntaxes}
+  - name: {syntax[name]}
+    {@if syntax[ignored_mext]}
+    template: tests/mext/readme/{syntax[name]}.mext.ignore
+    {@else}
+    template: tests/mext/readme/{syntax[name]}.mext
+    {@endif}
+    has_params: {syntax[has_input]}
+    {@if syntax[has_input]}
+    params: tests/mext/readme/{syntax[name]}.yaml
+    {@endif}
+    result: tests/mext/readme/{syntax[name]}.md
+  {@endfor}

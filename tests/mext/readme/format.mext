@@ -1,0 +1,3 @@
+{@import "format.yaml"}
+@format a variable using given format. Formatters can be registered with `parser.register_formatter`.
+{@format json var}

@@ -1,0 +1,9 @@
+@include content from "default.mext" file:
+```
+{@include "default.mext"}
+```
+
+With parameters:
+```
+{@include "default.mext" var=true}
+```

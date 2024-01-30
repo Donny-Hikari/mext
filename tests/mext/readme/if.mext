@@ -2,6 +2,10 @@
 
 {@if true}
 This will be shown.
+{@elif false}
+This will not be shown.
+{@else}
+This will not be shown, either.
 {@endif}
 
 {@if not empty var}

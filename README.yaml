@@ -1,9 +1,51 @@
 syntaxes:
   - name: if
     template: tests/mext/readme/if.mext
+    has_params: True
     params: tests/mext/readme/if.yaml
     result: tests/mext/readme/if.md
   - name: for
     template: tests/mext/readme/for.mext
+    has_params: True
     params: tests/mext/readme/for.yaml
     result: tests/mext/readme/for.md
+  - name: trim_newline
+    template: tests/mext/readme/trim_newline.mext
+    has_params: False
+    result: tests/mext/readme/trim_newline.md
+  - name: format
+    template: tests/mext/readme/format.mext
+    has_params: True
+    params: tests/mext/readme/format.yaml
+    result: tests/mext/readme/format.md
+  - name: import
+    template: tests/mext/readme/import.mext
+    has_params: True
+    params: tests/mext/readme/import.yaml
+    result: tests/mext/readme/import.md
+  - name: include
+    template: tests/mext/readme/include.mext
+    has_params: False
+    result: tests/mext/readme/include.md
+  - name: input
+    template: tests/mext/readme/input.mext.ignore
+    has_params: False
+    result: tests/mext/readme/input.md
+  - name: option
+    template: tests/mext/readme/option.mext
+    has_params: False
+    result: tests/mext/readme/option.md
+  - name: set
+    template: tests/mext/readme/set.mext
+    has_params: True
+    params: tests/mext/readme/set.yaml
+    result: tests/mext/readme/set.md
+  - name: default
+    template: tests/mext/readme/default.mext
+    has_params: True
+    params: tests/mext/readme/default.yaml
+    result: tests/mext/readme/default.md
+  - name: comment
+    template: tests/mext/readme/comment.mext
+    has_params: False
+    result: tests/mext/readme/comment.md

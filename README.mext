@@ -10,20 +10,24 @@ Mext is an prompt template extension for LLM (large language model).
 ### {syntax[name]}
 
 Template:
-```mext
+````mext
 {@import syntax[template] as template}
 {template}
-```
+````
 
-Given params:
-```json
+{@trim_newline}
+{@if syntax[has_params]}
 {@import syntax[params] as params}
+Given params:
+````json
 {@format json params}
-```
+````
+{@endif}
 
 Produce:
-```markdown
+````markdown
 {@import syntax[result] as result}
 {result}
-```
+````
+
 {@endfor}
