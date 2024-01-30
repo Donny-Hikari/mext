@@ -250,6 +250,9 @@ class MextParser:
               # if the block after '@trim_newline' produces empty,
               # trim the new lines after the block
               text = re.sub(r'\A\n*', '', text)
+              if len(text) == 0:
+                # continue to trim new lines
+                break
           self.trim_newline_state.pop()
           if len(self.trim_newline_state) == 0:
             break
@@ -311,17 +314,32 @@ class MextParser:
 
   async def parse_include(self):
     self.assert_missing_statement()
+    statement = self.state.statement
 
-    parts = self.state.statement.split(' ', 1)
-    nested_template_fn_var = parts[0]
+    parts = re.match(r'^(?:\"(?P<filepath>(?:[^\"]|(?<=\\)\")*(?<!\\))\"|(?P<filepath_var>[^"\s]*))(?:\s+(?P<params>(?:[^=\s]*=[^=\s]*)(?:,\s*[^=\s]*=[^=\s]*)*))?$', statement)
+    if parts is None:
+      self.raise_syntax_error(f'Keyword "include" requries \'@include ("filename"|filename_variable) [param=var,...]\' syntax.')
+
+    nested_template_fn = None
+    if parts['filepath'] is not None:
+      nested_template_fn = parts['filepath']
+    elif parts['filepath_var'] is not None:
+      nested_template_fn_var = parts['filepath_var']
+      nested_template_fn = await self.get_field_value(nested_template_fn_var)
+    else:
+      self.raise_error(RuntimeError, "Failed to identify include target.")
+    if not path.exists(nested_template_fn):
+      if self.template_fn is None:
+        self.raise_error(FileNotFoundError, f'Not found: {nested_template_fn}')
+      nested_template_fn = path.join(path.dirname(self.template_fn), nested_template_fn)
+
     additional_params = {}
-    if len(parts) > 1:
-      clauses = parts[1].split(',')
+    if parts['params'] is not None:
+      clauses = parts['params'].split(',')
       clauses = map(lambda p: (v.strip() for v in p.split('=', 1)), clauses)
       for key, val in clauses:
         additional_params[key] = await self.get_field_value(val)
 
-    nested_template_fn = await self.get_field_value(nested_template_fn_var)
     nested_template = self.template_loader(nested_template_fn)
     if asyncio.iscoroutine(nested_template):
       nested_template = await nested_template
@@ -334,6 +352,7 @@ class MextParser:
     nested_parser = MextParser()
     nested_result = await nested_parser.parse(
       template=nested_template,
+      template_fn=nested_template_fn,
       params=params,
       callbacks=self.callbacks,
       template_loader=self.template_loader,
@@ -370,21 +389,21 @@ class MextParser:
       import_fn = await self.get_field_value(import_fn_var)
     else:
       self.raise_error(RuntimeError, "Failed to identify import target.")
+    if not path.exists(import_fn):
+      if self.template_fn is None:
+        self.raise_error(FileNotFoundError, f'Not found: {import_fn}')
+      import_fn = path.join(path.dirname(self.template_fn), import_fn)
 
     varname = parts['namespace']
-
-    if not path.exists(import_fn):
-      import_fn = path.join(path.dirname(self.template_fn), import_fn)
 
     if path.splitext(import_fn)[1] in CFG.supported_extensions:
       imported_vars = CFG.load_config(import_fn)
       imported_vars = ObjDict.convert_recursively(imported_vars)
 
       if varname is None:
-        namespace = self.locals
+        self.locals.update(imported_vars)
       else:
-        namespace = self.locals[varname] = ObjDict({})
-      namespace.update(imported_vars)
+        self.locals[varname] = imported_vars
     else:
       if varname is None:
         self.raise_syntax_error(f'Trying to import file "{import_fn}" as text but missing the as clause. Usage: \'@import "text_file" as varname\'.')
