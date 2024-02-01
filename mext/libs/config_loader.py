@@ -3,6 +3,8 @@ import json
 import os
 from collections import namedtuple
 
+from mext.libs.utils import ObjDict
+
 class Dict2ObjParser:
   @classmethod
   def parse(cls, nested_dict):
@@ -38,6 +40,11 @@ class CFG:
   @property
   def supported_extensions(cls):
     return CFG.Extension2FileType.keys()
+
+  @classmethod
+  def load_config_as_objdict(cls, fn, filetype='auto'):
+    configs = cls.load_config(fn, filetype)
+    return ObjDict(configs)
 
   @classmethod
   def load_config_as_obj(cls, fn, filetype='auto'):
