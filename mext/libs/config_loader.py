@@ -44,7 +44,7 @@ class CFG:
   @classmethod
   def load_config_as_objdict(cls, fn, filetype='auto'):
     configs = cls.load_config(fn, filetype)
-    return ObjDict(configs)
+    return ObjDict.convert_recursively(configs)
 
   @classmethod
   def load_config_as_obj(cls, fn, filetype='auto'):

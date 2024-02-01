@@ -2,11 +2,21 @@ import sys
 from typing import Any
 import asyncio
 import os
+import traceback
+import re
 
 def ensure_folder_exists(fn):
   folder = os.path.dirname(fn)
   if folder != '':
     os.makedirs(folder, exist_ok=True)
+
+def format_exception(exc):
+  return ''.join(traceback.format_exception_only(type(exc), exc)).strip()
+
+def indent_lines(s_lines: str, indent):
+  indent_spaces = ' '*indent
+  s_indented, _ = re.subn(r'(^|\n)', fr'\1{indent_spaces}', s_lines)
+  return s_indented
 
 def auto_async(func):
   def wrapper(*args, **kwargs):

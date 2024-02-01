@@ -5,10 +5,9 @@ from string import Formatter
 from contextlib import contextmanager
 import asyncio
 from typing import Union, Tuple, Coroutine, Awaitable, Callable
-import traceback
 
 from mext.libs.config_loader import CFG
-from mext.libs.utils import auto_async
+from mext.libs.utils import auto_async, format_exception, indent_lines
 from mext.libs.utils import ObjDict
 
 class MextParser:
@@ -200,7 +199,7 @@ class MextParser:
       error_msg += f'In file "{self.template_fn}", line {self.linenumbers[-1]}, around "{self.state.field_name}".'
     else:
       error_msg += f'Line {self.linenumbers[-1]}, around "{self.state.field_name}".'
-    error_msg += f'\n  {msg}'
+    error_msg += f'\n{indent_lines(msg, indent=2)}'
     raise error_type(error_msg)
 
   def raise_syntax_error(self, msg):
@@ -222,7 +221,7 @@ class MextParser:
     try:
       field_value, _ = self.str_formatter.get_field(field_name, args=[], kwargs=self.all_variables)
     except Exception as e:
-      self.raise_error(RuntimeError, ''.join(traceback.format_exception_only(type(e), e)).strip())
+      self.raise_error(RuntimeError, format_exception(e))
     return field_value
 
   @auto_async
@@ -354,6 +353,9 @@ class MextParser:
       nested_template_fn = await self.get_field_value(nested_template_fn_var)
     else:
       self.raise_error(RuntimeError, "Failed to identify include target.")
+    if nested_template_fn is None:
+      self.raise_error(RuntimeError, f'Filepath cannot be None.')
+    nested_template_fn = str(nested_template_fn)
     if not path.exists(nested_template_fn):
       if self.template_fn is None:
         self.raise_error(FileNotFoundError, f'Not found: {nested_template_fn}')
@@ -366,9 +368,12 @@ class MextParser:
       for key, val in clauses:
         additional_params[key] = await self.get_field_value(val)
 
-    nested_template = self.template_loader(nested_template_fn)
-    if asyncio.iscoroutine(nested_template):
-      nested_template = await nested_template
+    try:
+      nested_template = self.template_loader(nested_template_fn)
+      if asyncio.iscoroutine(nested_template):
+        nested_template = await nested_template
+    except Exception as e:
+      self.raise_error(RuntimeError, f'Failed to include file "{nested_template_fn}".\n{format_exception(e)}')
 
     params = {
       **self.params,
@@ -416,6 +421,9 @@ class MextParser:
       import_fn = await self.get_field_value(import_fn_var)
     else:
       self.raise_error(RuntimeError, "Failed to identify import target.")
+    if import_fn is None:
+      self.raise_error(RuntimeError, f'Filepath cannot be None.')
+    import_fn = str(import_fn)
     if not path.exists(import_fn):
       if self.template_fn is None:
         self.raise_error(FileNotFoundError, f'Not found: {import_fn}')
@@ -424,22 +432,29 @@ class MextParser:
     varname = parts['namespace']
 
     if path.splitext(import_fn)[1] in CFG.supported_extensions:
-      imported_vars = CFG.load_config(import_fn)
-      imported_vars = ObjDict.convert_recursively(imported_vars)
-      if imported_vars is None:
-        imported_vars = {}
+      try:
+        imported_vars = CFG.load_config(import_fn)
+        imported_vars = ObjDict.convert_recursively(imported_vars)
+        if imported_vars is None:
+          imported_vars = {}
 
-      if varname is None:
-        self.locals.update(imported_vars)
-      else:
-        self.locals[varname] = imported_vars
+        if varname is None:
+          self.locals.update(imported_vars)
+        else:
+          self.locals[varname] = imported_vars
+      except Exception as e:
+        self.raise_error(RuntimeError, f'Failed to import file "{import_fn}".\n{format_exception(e)}')
     else:
       if varname is None:
         self.raise_syntax_error(f'Trying to import file "{import_fn}" as text but missing the as clause. Usage: \'@import "text_file" as varname\'.')
-      with open(import_fn, 'r') as f:
-        lines = f.readlines()
-        imported_content = ''.join(lines)
-        self.locals[varname] = imported_content
+
+      try:
+        with open(import_fn, 'r') as f:
+          lines = f.readlines()
+          imported_content = ''.join(lines)
+          self.locals[varname] = imported_content
+      except Exception as e:
+        self.raise_error(RuntimeError, f'Failed to import file "{import_fn}".\n{format_exception(e)}')
 
   async def parse_if(self):
     self.assert_missing_statement()
