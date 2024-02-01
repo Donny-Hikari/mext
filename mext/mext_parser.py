@@ -353,13 +353,25 @@ class MextParser:
       nested_template_fn = await self.get_field_value(nested_template_fn_var)
     else:
       self.raise_error(RuntimeError, "Failed to identify include target.")
+
     if nested_template_fn is None:
       self.raise_error(RuntimeError, f'Filepath cannot be None.')
     nested_template_fn = str(nested_template_fn)
     if not path.exists(nested_template_fn):
-      if self.template_fn is None:
-        self.raise_error(FileNotFoundError, f'Not found: {nested_template_fn}')
-      nested_template_fn = path.join(path.dirname(self.template_fn), nested_template_fn)
+      file_found = False
+      if not nested_template_fn.endswith('.mext') and path.exists(nested_template_fn+".mext"):
+          nested_template_fn += ".mext"
+          file_found = True
+      if not file_found and self.template_fn is not None:
+        nested_template_fn = path.join(path.dirname(self.template_fn), nested_template_fn)
+        if path.exists(nested_template_fn):
+          file_found = True
+        else:
+          if not nested_template_fn.endswith('.mext') and path.exists(nested_template_fn+".mext"):
+            nested_template_fn += ".mext"
+            file_found = True
+      if not file_found:
+        self.raise_error(FileNotFoundError, f'File not found: "{parts["filepath"]}".')
 
     additional_params = {}
     if parts['params'] is not None:
@@ -373,7 +385,7 @@ class MextParser:
       if asyncio.iscoroutine(nested_template):
         nested_template = await nested_template
     except Exception as e:
-      self.raise_error(RuntimeError, f'Failed to include file "{nested_template_fn}".\n{format_exception(e)}')
+      self.raise_error(RuntimeError, f'Failed to include file "{parts["filepath"]}".\n{format_exception(e)}')
 
     params = {
       **self.params,
@@ -421,13 +433,18 @@ class MextParser:
       import_fn = await self.get_field_value(import_fn_var)
     else:
       self.raise_error(RuntimeError, "Failed to identify import target.")
+
     if import_fn is None:
       self.raise_error(RuntimeError, f'Filepath cannot be None.')
     import_fn = str(import_fn)
     if not path.exists(import_fn):
-      if self.template_fn is None:
-        self.raise_error(FileNotFoundError, f'Not found: {import_fn}')
-      import_fn = path.join(path.dirname(self.template_fn), import_fn)
+      file_found = False
+      if self.template_fn is not None:
+        import_fn = path.join(path.dirname(self.template_fn), import_fn)
+        if path.exists(import_fn):
+          file_found = True
+      if not file_found:
+        self.raise_error(FileNotFoundError, f'File not found: "{parts["filepath"]}".')
 
     varname = parts['namespace']
 
@@ -443,10 +460,10 @@ class MextParser:
         else:
           self.locals[varname] = imported_vars
       except Exception as e:
-        self.raise_error(RuntimeError, f'Failed to import file "{import_fn}".\n{format_exception(e)}')
+        self.raise_error(RuntimeError, f'Failed to import file "{parts["filepath"]}".\n{format_exception(e)}')
     else:
       if varname is None:
-        self.raise_syntax_error(f'Trying to import file "{import_fn}" as text but missing the as clause. Usage: \'@import "text_file" as varname\'.')
+        self.raise_syntax_error(f'Trying to import file "{parts["filepath"]}" as text but missing the as clause. Usage: \'@import "text_file" as varname\'.')
 
       try:
         with open(import_fn, 'r') as f:
@@ -454,7 +471,7 @@ class MextParser:
           imported_content = ''.join(lines)
           self.locals[varname] = imported_content
       except Exception as e:
-        self.raise_error(RuntimeError, f'Failed to import file "{import_fn}".\n{format_exception(e)}')
+        self.raise_error(RuntimeError, f'Failed to import file "{parts["filepath"]}".\n{format_exception(e)}')
 
   async def parse_if(self):
     self.assert_missing_statement()
