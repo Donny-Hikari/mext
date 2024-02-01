@@ -18,6 +18,7 @@ class Mext:
   def __init__(self):
     self.template = ""
     self.params = {}
+    self.callbacks = {}
 
   @contextmanager
   def use_template(self, template=None, template_fn=None):
@@ -38,6 +39,16 @@ class Mext:
     self.clear_params()
     self.set_params(**old_params)
 
+  @contextmanager
+  def use_callbacks(self, **kwargs):
+    old_callbacks = self.callbacks
+
+    self.set_callbacks(**kwargs)
+    yield
+
+    self.clear_callbacks()
+    self.set_callbacks(**old_callbacks)
+
   def set_template(self, template=None, template_fn=None):
     if template_fn is not None:
       template = self._load_template(template_fn)
@@ -55,6 +66,15 @@ class Mext:
 
   def has_param(self, param_name):
     return param_name in self.params
+
+  def set_callbacks(self, **kwargs):
+    self.callbacks = {**self.callbacks, **kwargs}
+
+  def clear_callbacks(self):
+    self.callbacks = {}
+
+  def has_callback(self, callback_name):
+    return callback_name in self.callbacks
 
   def _load_template(self, template_fn):
     return self._load_prompt(f"{template_fn}")
