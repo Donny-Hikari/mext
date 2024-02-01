@@ -5,7 +5,7 @@ from os import path
 from mext.libs.config_loader import CFG
 from mext.libs.utils import ensure_folder_exists
 from mext.libs.utils import ObjDict
-from mext.mext import Mext
+from mext import Mext
 
 def parse_args(argv=sys.argv[1:]):
   parser = argparse.ArgumentParser()
