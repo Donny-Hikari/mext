@@ -15,6 +15,7 @@ class MextParser:
     'option',
     'set',
     'default',
+    'count',
     'include',
     'input',
     'import',
@@ -336,6 +337,18 @@ class MextParser:
       var2_val = await self.get_field_value(var2_name)
       self.locals[var1_name] = var2_val
 
+  async def parse_count(self):
+    self.assert_missing_statement()
+
+    varname = self.state.statement
+    try:
+      varvalue = await self.get_field_value(varname)
+      varvalue += 1
+    except Exception:
+      varvalue = 0
+
+    self.locals[varname] = varvalue
+
   async def parse_include(self):
     self.assert_missing_statement()
     statement = self.state.statement
@@ -473,32 +486,55 @@ class MextParser:
       except Exception as e:
         self.raise_error(RuntimeError, f'Failed to import file "{parts["filepath"]}".\n{format_exception(e)}')
 
-  async def parse_if(self):
-    self.assert_missing_statement()
-    statement = self.state.statement
-
+  async def test_statement(self, statement):
     reg = MextParser.RegExps
-    parts = re.match(fr'(?P<operators>(not\s+)?(empty\s+)?)(?P<varname>{reg.variable})', statement)
+    parts = re.match(fr'(?P<operators>(not\s+)?((?:empty|undefined|novalue)\s+)?)(?P<varname>{reg.variable})', statement)
     if parts is None:
-      self.raise_syntax_error(f'Keyword "if" requires "@if [not|empty] varname" syntax.')
+      self.raise_syntax_error(f'Keyword "if" requires "@if [not] [empty|undefined|novalue] varname" syntax.')
 
     operators = parts['operators']
     operators = re.split(r'\s+', operators)
     inverse = 'not' in operators
     test_empty = 'empty' in operators
+    test_undefined = 'undefined' in operators
+    test_novalue = 'novalue' in operators
 
     field_name = parts['varname']
-    field_value = await self.get_field_value(field_name)
-    if test_empty:
+    eval_result = None
+    field_value = None
+
+    if test_undefined or test_novalue:
+      try:
+        field_value = await self.get_field_value(field_name)
+        if test_undefined:
+          eval_result = False
+      except RuntimeError as e:
+        eval_result = True
+    else:
+      field_value = await self.get_field_value(field_name)
+
+    if eval_result is None and (test_empty or test_novalue):
       if field_value is None:
-        field_value = True
+        eval_result = True
       elif hasattr(field_value, '__len__'):
-        field_value = len(field_value) == 0
+        eval_result = len(field_value) == 0
       else:
-        field_value = False
+        eval_result = False
+
+    if eval_result is None:
+      eval_result = bool(field_value)
+
     if inverse:
-      field_value = not field_value
-    if not field_value:
+      eval_result = not eval_result
+
+    return eval_result
+
+  async def parse_if(self):
+    self.assert_missing_statement()
+    statement = self.state.statement
+
+    eval_result = await self.test_statement(statement)
+    if not eval_result:
       self.skip_until(['else', 'elif', 'endif'], ['if'], ['endif'])
       if self.state.keyword == 'elif':
         return await self.parse_if()
@@ -555,7 +591,7 @@ class MextParser:
         for varname,value in zip(varnames, current_value):
           self.locals[varname] = value
     except StopIteration:
-      pass
+      self.skip_until(['endfor'], ['for'], ['endfor'])
 
   async def parse_endfor(self):
     self.assert_unexpected_statement()

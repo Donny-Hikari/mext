@@ -90,6 +90,46 @@ No empty line above.""", params={
     }, use_async=False)
     self.assertEqual(res, "Val1")
 
+  def test_count(self):
+    parser = MextParser()
+    res = parser.parse("""\
+{@option final_strip off}
+{@count idx}
+{idx}\
+""", use_async=False)
+    self.assertEqual(res, "0")
+
+    res = parser.parse("""\
+{@for item in arr}
+{@count idx}
+{idx}. {item}
+{@endfor}\
+""", params={
+      'arr': [0, 1, 2, 3],
+    }, use_async=False)
+    self.assertEqual(res, """\
+0. 0
+1. 1
+2. 2
+3. 3\
+""")
+
+    res = parser.parse("""\
+{@set idx 0}
+{@for item in arr}
+{@count idx}
+{idx}. {item}
+{@endfor}\
+""", params={
+      'arr': [1, 2, 3, 4],
+    }, use_async=False)
+    self.assertEqual(res, """\
+1. 1
+2. 2
+3. 3
+4. 4\
+""")
+
   def test_number(self):
     parser = MextParser()
     res = parser.parse("""\
@@ -264,8 +304,20 @@ age: 19\
     }, use_async=False)
     self.assertEqual(res, "Pass")
 
-  def test_if_empty(self):
+  def test_if_operators(self):
     parser = MextParser()
+    cases = [
+      ({}, True),
+      ({ 'var': [] }, False),
+      ({ 'var': None }, False),
+    ]
+    for params, expected in cases:
+      res = parser.parse("""var is {@if undefined var}undefined{@else}not undefined{@endif}""", params=params, use_async=False)
+      self.assertEqual(res, f'var is ' + ("undefined" if expected else "not undefined"))
+
+      res = parser.parse("""var is {@if not undefined var}not undefined{@else}undefined{@endif}""", params=params, use_async=False)
+      self.assertEqual(res, f'var is ' + ("undefined" if expected else "not undefined"))
+
     cases = [
       ([], True),
       ({}, True),
@@ -277,6 +329,11 @@ age: 19\
     ]
     for var, expected in cases:
       res = parser.parse(""""{var}" is {@if empty var}empty{@else}not empty{@endif}""", params={
+        'var': var,
+      }, use_async=False)
+      self.assertEqual(res, f'"{var}" is ' + ("empty" if expected else "not empty"))
+
+      res = parser.parse(""""{var}" is {@if not empty var}not empty{@else}empty{@endif}""", params={
         'var': var,
       }, use_async=False)
       self.assertEqual(res, f'"{var}" is ' + ("empty" if expected else "not empty"))
@@ -362,21 +419,16 @@ Age: 19\
 """)
 
     res = parser.parse("""\
-Two
-{@if false}
-{@endif}
-{@if false}
-{@endif}
-{@if true}
-awesome
-{@endif}
-lines
-""", use_async=False)
-    self.assertEqual(res, """\
-Two
-awesome
-lines\
-""")
+{@for vs in arr}
+{@for v in vs}
+{v}
+{@endfor}
+{@endfor}
+""",
+      params={
+        'arr': [],
+    }, use_async=False)
+    self.assertEqual(res, "")
 
     parser.reset()
     parser.enable_trace(True)
@@ -735,6 +787,23 @@ Failed
       'val_pass': "\nPass",
     }, use_async=False)
     self.assertEqual(res, "Is\n  \nPass")
+
+    res = parser.parse("""\
+Two
+{@if false}
+{@endif}
+{@if false}
+{@endif}
+{@if true}
+awesome
+{@endif}
+lines
+""", use_async=False)
+    self.assertEqual(res, """\
+Two
+awesome
+lines\
+""")
 
   def test_clauses_whitespaces(self):
     parser = MextParser()
