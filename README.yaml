@@ -45,6 +45,11 @@ syntaxes:
     has_params: True
     params: tests/mext/readme/default.yaml
     result: tests/mext/readme/default.md
+  - name: count
+    template: tests/mext/readme/count.mext
+    has_params: True
+    params: tests/mext/readme/count.yaml
+    result: tests/mext/readme/count.md
   - name: comment
     template: tests/mext/readme/comment.mext
     has_params: False

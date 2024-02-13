@@ -29,6 +29,9 @@ syntaxes:
   - name: default
     ignored_mext: False
     has_input: True
+  - name: count
+    ignored_mext: False
+    has_input: True
   - name: comment
     ignored_mext: False
     has_input: False

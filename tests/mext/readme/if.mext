@@ -11,3 +11,14 @@ This will not be shown, either.
 {@if not empty var}
 {var}
 {@endif}
+
+{@if not undefined var}
+var is defined.
+{@endif}
+{@if undefined var2}
+var2 is undefined.
+{@endif}
+
+{@if novalue var2}
+var2 has no value.
+{@endif}

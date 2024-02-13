@@ -1,0 +1,7 @@
+{@import "count.yaml"}
+
+{@set idx 0}
+{@for item in items}
+{@count idx}
+{idx}. {item}
+{@endfor}
