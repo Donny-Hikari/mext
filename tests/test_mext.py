@@ -625,7 +625,7 @@ This is a multi-line paragraph.
   def test_format_escape(self):
     parser = MextParser()
     res = parser.parse("""\
-var1: {@format escape var1 esc_chars="\n"}
+var1: {@format escape var1 esc_chars="\\n"}
 """,
       params={
         'var1': """\
@@ -640,17 +640,17 @@ This is a multi-line paragraph.
 |name|desc
 |---|---
 {@for name, desc in table}
-|{name}|{@format escape desc esc_chars = "\n|"}
+|{name}|{@format escape desc esc_chars = "|\\n\\\\"}
 """,
       params={
         'table': {
-          'why': "This is useful for making tables\n|| one-liner.",
+          'why': "This is useful for making tables,\none-liner || general escaping like \\.",
         },
     }, use_async=False)
     self.assertEqual(res, """\
 |name|desc
 |---|---
-|why|This is useful for making tables\\n\|\| one-liner.\
+|why|This is useful for making tables,\\none-liner \|\| general escaping like \\\\.\
 """)
 
   def test_comment(self):

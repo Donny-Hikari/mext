@@ -674,7 +674,12 @@ class MextParser:
     return json.dumps(value, indent=2, ensure_ascii=False)
 
   @classmethod
-  async def format_escape(self, value: str, esc_chars="\n"):
+  async def format_escape(self, value: str, esc_chars: str="\\n"):
+    esc_chars = esc_chars.encode().decode('unicode_escape')
+    esc_chars = set(esc_chars)
+    if '\\' in esc_chars:
+      esc_chars.remove('\\')
+      esc_chars = ['\\'] + list(esc_chars)
     for char in esc_chars:
       escaped_chr = char.encode('unicode_escape').decode()
       if escaped_chr == char:
