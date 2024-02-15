@@ -56,6 +56,7 @@ class MextParser:
     self.formatters = {}
     default_formattters = {
       'json': MextParser.format_json,
+      'repr': repr,
     }
     for format_name, formatter in default_formattters.items():
       self.register_formatter(format_name, formatter)

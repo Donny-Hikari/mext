@@ -576,7 +576,7 @@ A line.
 End.\
 """)
 
-  def test_format(self):
+  def test_format_json(self):
     parser = MextParser()
     res = parser.parse("""\
 {@format json var1}
@@ -599,6 +599,20 @@ End.\
   }
 ]\
 """)
+
+  def test_format_repr(self):
+    parser = MextParser()
+    res = parser.parse("""\
+var1: {@format repr var1}
+""",
+      params={
+        'var1': """\
+This is a multi-line paragraph.
+"Sentences like these should be escaped."
+'And this one too.'\
+""",
+    }, use_async=False)
+    self.assertEqual(res, """var1: 'This is a multi-line paragraph.\\n"Sentences like these should be escaped."\\n\\'And this one too.\\''""")
 
   def test_comment(self):
     parser = MextParser()
