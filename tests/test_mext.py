@@ -182,11 +182,19 @@ No empty line above.""", params={
 
     res = parser.parse("""\
 Included from template1:
-{@include prompts.template1 var1=false}
+{@include prompts.template1 var1 = false}
 """, params={
       'prompts': self.prompts,
     }, use_async=False)
     self.assertEqual(res, "Included from template1:\nUsing additional parameter value.")
+
+    res = parser.parse("""\
+Included from template1:
+{@include prompts.template1 var1 = false, var2=true}
+""", params={
+      'prompts': self.prompts,
+    }, use_async=False)
+    self.assertEqual(res, "Included from template1:\nUsing additional parameter value.\nAnother variable var2 is True.")
 
   def test_input(self):
     parser = MextParser()
@@ -632,7 +640,7 @@ This is a multi-line paragraph.
 |name|desc
 |---|---
 {@for name, desc in table}
-|{name}|{@format escape desc esc_chars="\n|"}
+|{name}|{@format escape desc esc_chars = "\n|"}
 """,
       params={
         'table': {

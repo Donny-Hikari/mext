@@ -356,7 +356,7 @@ class MextParser:
     statement = self.state.statement
 
     reg = MextParser.RegExps
-    parts = re.match(fr'^(?:\"(?P<filepath>{reg.string})\"|(?P<filepath_var>{reg.variable}))(?:\s+(?P<params>(?:{reg.variable}={reg.variable})(?:,\s*{reg.variable}={reg.variable})*))?$', statement)
+    parts = re.match(fr'^(?:\"(?P<filepath>{reg.string})\"|(?P<filepath_var>{reg.variable}))(?:\s+(?P<params>(?:{reg.variable}\s*=\s*{reg.variable})(?:,\s*{reg.variable}\s*=\s*{reg.variable})*))?$', statement)
     if parts is None:
       self.raise_syntax_error(f'Keyword "include" requries \'@include ("filename"|filename_variable) [param=var,...]\' syntax.')
 
@@ -634,7 +634,7 @@ class MextParser:
     statement = self.state.statement
 
     reg = MextParser.RegExps
-    parts = re.match(fr'^(?P<format>{reg.string})\s+(?P<varname>{reg.variable})(?:\s+(?P<params>(?:{reg.variable}=\"{reg.string}\")(?:,\s*{reg.variable}=\"{reg.string}\")*))?$', statement)
+    parts = re.match(fr'^(?P<format>{reg.string})\s+(?P<varname>{reg.variable})(?:\s+(?P<params>(?:{reg.variable}\s*=\s*\"{reg.string}\")(?:,\s*{reg.variable}\s*=\s*\"{reg.string}\")*))?$', statement)
     if parts is None:
       self.raise_syntax_error(f'Keyword "format" requries \'@format "format" variable [param=var,...]\' syntax.')
 
