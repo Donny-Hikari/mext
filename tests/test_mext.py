@@ -608,11 +608,42 @@ var1: {@format repr var1}
       params={
         'var1': """\
 This is a multi-line paragraph.
-"Sentences like these should be escaped."
+"Sentences like this should be escaped."
 'And this one too.'\
 """,
     }, use_async=False)
-    self.assertEqual(res, """var1: 'This is a multi-line paragraph.\\n"Sentences like these should be escaped."\\n\\'And this one too.\\''""")
+    self.assertEqual(res, """var1: 'This is a multi-line paragraph.\\n"Sentences like this should be escaped."\\n\\'And this one too.\\''""")
+
+  def test_format_escape(self):
+    parser = MextParser()
+    res = parser.parse("""\
+var1: {@format escape var1 esc_chars="\n"}
+""",
+      params={
+        'var1': """\
+This is a multi-line paragraph.
+"Sentences like this won't be escaped."
+'And this one too.'\
+""",
+    }, use_async=False)
+    self.assertEqual(res, """var1: This is a multi-line paragraph.\\n"Sentences like this won't be escaped."\\n'And this one too.'""")
+
+    res = parser.parse("""\
+|name|desc
+|---|---
+{@for name, desc in table}
+|{name}|{@format escape desc esc_chars="\n|"}
+""",
+      params={
+        'table': {
+          'why': "This is useful for making tables\n|| one-liner.",
+        },
+    }, use_async=False)
+    self.assertEqual(res, """\
+|name|desc
+|---|---
+|why|This is useful for making tables\\n\|\| one-liner.\
+""")
 
   def test_comment(self):
     parser = MextParser()

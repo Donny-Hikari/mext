@@ -57,6 +57,7 @@ class MextParser:
     default_formattters = {
       'json': MextParser.format_json,
       'repr': repr,
+      'escape': MextParser.format_escape,
     }
     for format_name, formatter in default_formattters.items():
       self.register_formatter(format_name, formatter)
@@ -632,19 +633,24 @@ class MextParser:
     self.assert_missing_statement()
     statement = self.state.statement
 
-    parts = statement.split(' ', 1)
-    format = parts[0]
-    if len(parts) == 1:
-      self.raise_syntax_error('Misssing statement, keyword "format" requires a format and an variable.')
-    statement = parts[1].strip()
+    reg = MextParser.RegExps
+    parts = re.match(fr'^(?P<format>{reg.string})\s+(?P<varname>{reg.variable})(?:\s+(?P<params>(?:{reg.variable}=\"{reg.string}\")(?:,\s*{reg.variable}=\"{reg.string}\")*))?$', statement)
+    if parts is None:
+      self.raise_syntax_error(f'Keyword "format" requries \'@format "format" variable [param=var,...]\' syntax.')
 
-    field_name = statement
+    format = parts['format']
+    field_name = parts['varname']
     field_value = await self.get_field_value(field_name)
 
     if format not in self.formatters:
       self.raise_error(RuntimeError, f'Format "{format}" is not registered.')
 
-    format_res = self.formatters[format](field_value)
+    formatter_params = {}
+    if parts['params'] is not None:
+      clauses = parts['params'].split(',')
+      formatter_params = { k.strip(): v.strip()[1:-1] for k, v in map(lambda p: p.split('=', 1), clauses) }
+
+    format_res = self.formatters[format](field_value, **formatter_params)
     if asyncio.iscoroutine(format_res):
       format_res = await format_res
     self.append_text(format_res)
@@ -666,3 +672,12 @@ class MextParser:
   @classmethod
   async def format_json(self, value):
     return json.dumps(value, indent=2, ensure_ascii=False)
+
+  @classmethod
+  async def format_escape(self, value: str, esc_chars="\n"):
+    for char in esc_chars:
+      escaped_chr = char.encode('unicode_escape').decode()
+      if escaped_chr == char:
+        escaped_chr = '\\' + char
+      value = value.replace(char, escaped_chr)
+    return value
