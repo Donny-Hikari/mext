@@ -18,6 +18,12 @@ def indent_lines(s_lines: str, indent):
   s_indented, _ = re.subn(r'(^|\n)', fr'\1{indent_spaces}', s_lines)
   return s_indented
 
+def fence_content(content):
+  block_fences = re.findall(r'\`{3,}', content)
+  max_block_fences = max([*map(len, block_fences), 2])
+  fence = '`'*(max_block_fences+1)
+  return f'{fence}\n{content}\n{fence}'
+
 def auto_async(func):
   def wrapper(*args, **kwargs):
     use_async = True

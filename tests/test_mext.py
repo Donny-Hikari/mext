@@ -653,6 +653,47 @@ This is a multi-line paragraph.
 |why|This is useful for making tables,\\none-liner \|\| general escaping like \\\\.\
 """)
 
+  def test_format_fenced_block(self):
+    parser = MextParser()
+    res = parser.parse("""\
+Markdown fenced block:
+{@format fenced_block var1}
+""",
+      params={
+        'var1': """\
+This is a markdown block.
+```python
+print('It contains code block.')
+```\
+""",
+    }, use_async=False)
+    self.assertEqual(res, """\
+Markdown fenced block:
+````
+This is a markdown block.
+```python
+print('It contains code block.')
+```
+````\
+""")
+
+    res = parser.parse("""\
+|name|desc
+|---|---
+{@for name, desc in table}
+|{name}|{@format escape desc esc_chars = "|\\n\\\\"}
+""",
+      params={
+        'table': {
+          'why': "This is useful for making tables,\none-liner || general escaping like \\.",
+        },
+    }, use_async=False)
+    self.assertEqual(res, """\
+|name|desc
+|---|---
+|why|This is useful for making tables,\\none-liner \|\| general escaping like \\\\.\
+""")
+
   def test_comment(self):
     parser = MextParser()
     res = parser.parse("""\

@@ -7,7 +7,7 @@ import asyncio
 from typing import Union, Tuple, Coroutine, Awaitable, Callable
 
 from mext.libs.config_loader import CFG
-from mext.libs.utils import auto_async, format_exception, indent_lines
+from mext.libs.utils import auto_async, format_exception, indent_lines, fence_content
 from mext.libs.utils import ObjDict
 
 class MextParser:
@@ -58,6 +58,7 @@ class MextParser:
       'json': MextParser.format_json,
       'repr': repr,
       'escape': MextParser.format_escape,
+      'fenced_block': fence_content,
     }
     for format_name, formatter in default_formattters.items():
       self.register_formatter(format_name, formatter)
