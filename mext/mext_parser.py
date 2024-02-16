@@ -372,21 +372,22 @@ class MextParser:
     if nested_template_fn is None:
       self.raise_error(RuntimeError, f'Filepath cannot be None.')
     nested_template_fn = str(nested_template_fn)
+    ogn_nested_fn = nested_template_fn
     if not path.exists(nested_template_fn):
       file_found = False
-      if not nested_template_fn.endswith('.mext') and path.exists(nested_template_fn+".mext"):
-          nested_template_fn += ".mext"
+      if not nested_template_fn.endswith('.mext') and path.exists(nested_template_fn+'.mext'):
+          nested_template_fn += '.mext'
           file_found = True
       if not file_found and self.template_fn is not None:
         nested_template_fn = path.join(path.dirname(self.template_fn), nested_template_fn)
         if path.exists(nested_template_fn):
           file_found = True
         else:
-          if not nested_template_fn.endswith('.mext') and path.exists(nested_template_fn+".mext"):
-            nested_template_fn += ".mext"
+          if not nested_template_fn.endswith('.mext') and path.exists(nested_template_fn+'.mext'):
+            nested_template_fn += '.mext'
             file_found = True
       if not file_found:
-        self.raise_error(FileNotFoundError, f'File not found: "{parts["filepath"]}".')
+        self.raise_error(FileNotFoundError, f'File not found: "{ogn_nested_fn}".')
 
     additional_params = {}
     if parts['params'] is not None:
