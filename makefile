@@ -10,6 +10,6 @@ clean:
 test:
 	python -m unittest tests.test
 
-readme:
-	python -m mext.scripts.render_mext README-yaml.mext -o README.yaml
-	python -m mext.scripts.render_mext README.mext -o README
+README: readme_src/*
+	python -m mext.scripts.render_mext readme_src/README-yaml.mext -o readme_src/README.yaml
+	python -m mext.scripts.render_mext readme_src/README.mext -o README
