@@ -230,9 +230,9 @@ class MextParser:
 
   @auto_async
   async def parse(self, template=None, params={}, callbacks={}, template_fn=None, template_loader=None):
+    self.set_template(template=template, template_fn=template_fn) # this will reset all state
     if template_loader is not None:
       self.template_loader = template_loader
-    self.set_template(template=template, template_fn=template_fn)
     self.params = params
     self.callbacks = callbacks
 

@@ -51,6 +51,9 @@ class ObjDict(dict):
   def __setattr__(self, __name: str, __value: Any) -> None:
     self[__name] = __value
 
+  def __delattr__(self, __name: str) -> None:
+    del self[__name]
+
   @classmethod
   def convert_recursively(cls, _v):
     objdict = None
