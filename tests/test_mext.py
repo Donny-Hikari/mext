@@ -942,6 +942,36 @@ Include an empty template:
 End of the empty template.\
 """)
 
+    res = parser.parse("""\
+Include an empty template:
+{@if true}
+  {@if false}{@endif}
+{@endif}
+End of the empty template.
+""", params={
+      'prompts': self.prompts,
+    }, use_async=False)
+    self.assertEqual(res, """\
+Include an empty template:
+End of the empty template.\
+""")
+
+    parser.reset()
+    parser.enable_trace(True)
+    res = parser.parse("""\
+Include an empty template:
+{@trim_newline}{@for v in arr}
+  {@if false}{@endif}
+{@endif}
+End of the empty template.
+""", params={
+      'arr': [1],
+    }, use_async=False)
+    self.assertEqual(res, """\
+Include an empty template:
+End of the empty template.\
+""")
+
   def test_readme(self):
     parser = MextParser()
     readme_files = os.listdir(self.dirs.readme)

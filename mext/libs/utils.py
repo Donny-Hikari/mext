@@ -69,3 +69,27 @@ class ObjDict(dict):
       objdict = _v
 
     return objdict
+
+  @classmethod
+  def merge_recursively(cls, obj1, obj2):
+    for key, value in obj2.items():
+      if key in obj1 and isinstance(obj1[key], dict) and isinstance(value, dict):
+        # Recursive call for nested dictionaries
+        cls.merge_recursively(obj1[key], value)
+      else:
+        # Update or add the key-value pair
+        obj1[key] = value
+    return obj1
+
+  @classmethod
+  def set_defaults(cls, obj1, obj2):
+    obj2 = ObjDict.convert_recursively(obj2)
+    for key, value in obj2.items():
+      if key in obj1:
+        if isinstance(obj1[key], dict) and isinstance(value, dict):
+          # Recursive call for nested dictionaries
+          cls.set_defaults(obj1[key], value)
+      else:
+        # Update or add the key-value pair
+        obj1[key] = value
+    return obj1

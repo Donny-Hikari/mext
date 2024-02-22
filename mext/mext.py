@@ -25,29 +25,32 @@ class Mext:
     old_template = self.template
 
     self.set_template(template=template, template_fn=template_fn)
-    yield
-
-    self.set_template(template=old_template)
+    try:
+      yield
+    finally:
+      self.set_template(template=old_template)
 
   @contextmanager
   def use_params(self, **kwargs):
     old_params = self.params
 
     self.set_params(**kwargs)
-    yield
-
-    self.clear_params()
-    self.set_params(**old_params)
+    try:
+      yield
+    finally:
+      self.clear_params()
+      self.set_params(**old_params)
 
   @contextmanager
   def use_callbacks(self, **kwargs):
     old_callbacks = self.callbacks
 
     self.set_callbacks(**kwargs)
-    yield
-
-    self.clear_callbacks()
-    self.set_callbacks(**old_callbacks)
+    try:
+      yield
+    finally:
+      self.clear_callbacks()
+      self.set_callbacks(**old_callbacks)
 
   def set_template(self, template=None, template_fn=None):
     if template_fn is not None:

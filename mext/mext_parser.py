@@ -290,7 +290,7 @@ class MextParser:
       pending_whitespaces = self.pending_whitespaces
       self.pending_whitespaces = None
     elif self.state.field_name is not None and ((m := re.search(fr'\n{whitespaces}*\Z', text))
-          or (self.pos_index == 0 and (m := re.fullmatch(fr'{whitespaces}*', text)))):
+          or ((self.pos_index == 0 or self.pending_whitespaces == '') and (m := re.fullmatch(fr'{whitespaces}*', text)))):
       text = text[:-len(m[0])]
       pending_whitespaces = m[0]
 
