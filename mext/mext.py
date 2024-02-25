@@ -3,12 +3,10 @@ import json
 from os import path
 from string import Formatter
 from contextlib import contextmanager
-import asyncio
-from typing import Union, Tuple, Coroutine, Awaitable, Callable
+from typing import Union, Tuple, Coroutine, Callable
 import traceback
 
 from mext.libs.config_loader import CFG
-from mext.libs.utils import auto_async
 from mext.libs.utils import ObjDict
 from mext.mext_parser import MextParser
 
@@ -92,8 +90,7 @@ class Mext:
 
     return prompt
 
-  @auto_async
-  async def compose(self, template=None, template_fn=None, callbacks={},
+  def compose(self, template=None, template_fn=None, callbacks={},
       **kwargs) -> Union[str, Tuple[str, dict]]:
     """
     The template will be formatted using the params provided.
@@ -112,7 +109,7 @@ class Mext:
     }
 
     parser = MextParser()
-    parsed_result = await parser.parse(template=template, template_fn=template_fn, params=all_kwargs, callbacks=callbacks, template_loader=self._load_template)
+    parsed_result = parser.parse(template=template, template_fn=template_fn, params=all_kwargs, callbacks=callbacks, template_loader=self._load_template)
 
     if len(callbacks) == 0:
       return parsed_result

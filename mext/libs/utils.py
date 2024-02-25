@@ -1,6 +1,5 @@
 import sys
 from typing import Any
-import asyncio
 import os
 import traceback
 import re
@@ -23,20 +22,6 @@ def fence_content(content):
   max_block_fences = max([*map(len, block_fences), 2])
   fence = '`'*(max_block_fences+1)
   return f'{fence}\n{content}\n{fence}'
-
-def auto_async(func):
-  def wrapper(*args, **kwargs):
-    use_async = True
-    if 'use_async' in kwargs:
-      use_async = kwargs.pop('use_async')
-
-    routine = func(*args, **kwargs)
-    if use_async:
-      return routine
-    else:
-      loop = asyncio.get_event_loop()
-      return loop.run_until_complete(asyncio.ensure_future(routine))
-  return wrapper
 
 class ObjDict(dict):
   def __init__(self, *args, **kwargs):

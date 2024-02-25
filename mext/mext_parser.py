@@ -3,11 +3,10 @@ import json
 from os import path
 from string import Formatter
 from contextlib import contextmanager
-import asyncio
-from typing import Union, Tuple, Coroutine, Awaitable, Callable
+from typing import Union, Tuple, Coroutine, Callable
 
 from mext.libs.config_loader import CFG
-from mext.libs.utils import auto_async, format_exception, indent_lines, fence_content
+from mext.libs.utils import format_exception, indent_lines, fence_content
 from mext.libs.utils import ObjDict
 
 class MextParser:
@@ -217,7 +216,7 @@ class MextParser:
     if self.state.statement is not None:
       self.raise_syntax_error(f"Unexpected statement after {self.state.keyword}")
 
-  async def get_field_value(self, field_name):
+  def get_field_value(self, field_name):
     if re.match(r'^[-+]?\d+$', field_name):
       return int(field_name)
     if re.match(r'^[-+]?(\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?$', field_name):
@@ -228,8 +227,7 @@ class MextParser:
       self.raise_error(RuntimeError, format_exception(e))
     return field_value
 
-  @auto_async
-  async def parse(self, template=None, params={}, callbacks={}, template_fn=None, template_loader=None):
+  def parse(self, template=None, params={}, callbacks={}, template_fn=None, template_loader=None):
     self.set_template(template=template, template_fn=template_fn) # this will reset all state
     if template_loader is not None:
       self.template_loader = template_loader
@@ -248,9 +246,9 @@ class MextParser:
           self.level -= 1
 
         parse_fn = getattr(self, f"parse_{state.keyword}")
-        await parse_fn()
+        parse_fn()
       elif state.field_name is not None:
-        await self.parse_field()
+        self.parse_field()
 
     return self.parsed_result
 
@@ -297,7 +295,7 @@ class MextParser:
     self.append_text(text)
     self.pending_whitespaces = pending_whitespaces
 
-  async def parse_option(self):
+  def parse_option(self):
     self.assert_missing_statement()
 
     parts = self.state.statement.split(' ', 1)
@@ -315,7 +313,7 @@ class MextParser:
 
     self.options[opt_name] = val
 
-  async def parse_set(self):
+  def parse_set(self):
     self.assert_missing_statement()
 
     parts = self.state.statement.split(' ', 1)
@@ -324,10 +322,10 @@ class MextParser:
 
     var1_name = parts[0]
     var2_name = parts[1]
-    var2_val = await self.get_field_value(var2_name)
+    var2_val = self.get_field_value(var2_name)
     self.locals[var1_name] = var2_val
 
-  async def parse_default(self):
+  def parse_default(self):
     self.assert_missing_statement()
 
     parts = self.state.statement.split(' ', 1)
@@ -337,22 +335,22 @@ class MextParser:
     var1_name = parts[0]
     var2_name = parts[1]
     if var1_name not in self.all_variables:
-      var2_val = await self.get_field_value(var2_name)
+      var2_val = self.get_field_value(var2_name)
       self.locals[var1_name] = var2_val
 
-  async def parse_count(self):
+  def parse_count(self):
     self.assert_missing_statement()
 
     varname = self.state.statement
     try:
-      varvalue = await self.get_field_value(varname)
+      varvalue = self.get_field_value(varname)
       varvalue += 1
     except Exception:
       varvalue = 0
 
     self.locals[varname] = varvalue
 
-  async def parse_include(self):
+  def parse_include(self):
     self.assert_missing_statement()
     statement = self.state.statement
 
@@ -366,7 +364,7 @@ class MextParser:
       nested_template_fn = parts['filepath']
     elif parts['filepath_var'] is not None:
       nested_template_fn_var = parts['filepath_var']
-      nested_template_fn = await self.get_field_value(nested_template_fn_var)
+      nested_template_fn = self.get_field_value(nested_template_fn_var)
     else:
       self.raise_error(RuntimeError, "Failed to identify include target.")
 
@@ -395,12 +393,10 @@ class MextParser:
       clauses = parts['params'].split(',')
       clauses = map(lambda p: (v.strip() for v in p.split('=', 1)), clauses)
       for key, val in clauses:
-        additional_params[key] = await self.get_field_value(val)
+        additional_params[key] = self.get_field_value(val)
 
     try:
       nested_template = self.template_loader(nested_template_fn)
-      if asyncio.iscoroutine(nested_template):
-        nested_template = await nested_template
     except Exception as e:
       self.raise_error(RuntimeError, f'Failed to include file "{parts["filepath"]}".\n{format_exception(e)}')
 
@@ -410,7 +406,7 @@ class MextParser:
     }
 
     nested_parser = MextParser()
-    nested_result = await nested_parser.parse(
+    nested_result = nested_parser.parse(
       template=nested_template,
       template_fn=nested_template_fn,
       params=params,
@@ -419,21 +415,19 @@ class MextParser:
     )
     self.append_text(nested_result)
 
-  async def parse_input(self):
+  def parse_input(self):
     self.assert_missing_statement()
 
     varname = self.state.statement
     if varname not in self.callbacks:
       self.raise_error(RuntimeError, f'Missing callback for input variable "{varname}".')
     input_val = self.callbacks[varname](self.parsed_result)
-    if asyncio.iscoroutine(input_val):
-      input_val = await input_val
 
     self.append_text(input_val)
     self.locals[varname] = input_val
     self.input_results[varname] = input_val
 
-  async def parse_import(self):
+  def parse_import(self):
     self.assert_missing_statement()
     statement = self.state.statement
 
@@ -447,7 +441,7 @@ class MextParser:
       import_fn = parts['filepath']
     elif parts['filepath_var'] is not None:
       import_fn_var = parts['filepath_var']
-      import_fn = await self.get_field_value(import_fn_var)
+      import_fn = self.get_field_value(import_fn_var)
     else:
       self.raise_error(RuntimeError, "Failed to identify import target.")
 
@@ -490,7 +484,7 @@ class MextParser:
       except Exception as e:
         self.raise_error(RuntimeError, f'Failed to import file "{parts["filepath"]}".\n{format_exception(e)}')
 
-  async def test_statement(self, statement):
+  def test_statement(self, statement):
     reg = MextParser.RegExps
     parts = re.match(fr'(?P<operators>(not\s+)?((?:empty|undefined|novalue)\s+)?)(?P<varname>{reg.variable})', statement)
     if parts is None:
@@ -509,13 +503,13 @@ class MextParser:
 
     if test_undefined or test_novalue:
       try:
-        field_value = await self.get_field_value(field_name)
+        field_value = self.get_field_value(field_name)
         if test_undefined:
           eval_result = False
       except RuntimeError as e:
         eval_result = True
     else:
-      field_value = await self.get_field_value(field_name)
+      field_value = self.get_field_value(field_name)
 
     if eval_result is None and (test_empty or test_novalue):
       if field_value is None:
@@ -533,30 +527,30 @@ class MextParser:
 
     return eval_result
 
-  async def parse_if(self):
+  def parse_if(self):
     self.assert_missing_statement()
     statement = self.state.statement
 
-    eval_result = await self.test_statement(statement)
+    eval_result = self.test_statement(statement)
     if not eval_result:
       self.skip_until(['else', 'elif', 'endif'], ['if'], ['endif'])
       if self.state.keyword == 'elif':
-        return await self.parse_if()
+        return self.parse_if()
     else:
       return
 
-  async def parse_elif(self):
+  def parse_elif(self):
     self.skip_until(['endif'], ['if'], ['endif'])
 
-  async def parse_else(self):
+  def parse_else(self):
     self.assert_unexpected_statement()
 
     self.skip_until(['endif'], ['if'], ['endif'])
 
-  async def parse_endif(self):
+  def parse_endif(self):
     self.assert_unexpected_statement()
 
-  async def parse_for(self):
+  def parse_for(self):
     self.assert_missing_statement()
     statement = self.state.statement
 
@@ -570,7 +564,7 @@ class MextParser:
     iterable_name = parts['iterable_name']
 
     try:
-      iterable = await self.get_field_value(iterable_name)
+      iterable = self.get_field_value(iterable_name)
       if isinstance(iterable, dict):
         itr = iter(iterable.items())
       else:
@@ -597,7 +591,7 @@ class MextParser:
     except StopIteration:
       self.skip_until(['endfor'], ['for'], ['endfor'])
 
-  async def parse_endfor(self):
+  def parse_endfor(self):
     self.assert_unexpected_statement()
 
     if len(self.for_context) == 0:
@@ -621,7 +615,7 @@ class MextParser:
     except StopIteration:
       self.for_context.pop()
 
-  async def parse_trim_newline(self):
+  def parse_trim_newline(self):
     self.assert_unexpected_statement()
 
     self.append_text(self.pending_whitespaces, flush_pending=False)
@@ -631,7 +625,7 @@ class MextParser:
       'pos_mark': len(self.results),
     }))
 
-  async def parse_format(self):
+  def parse_format(self):
     self.assert_missing_statement()
     statement = self.state.statement
 
@@ -642,7 +636,7 @@ class MextParser:
 
     format = parts['format']
     field_name = parts['varname']
-    field_value = await self.get_field_value(field_name)
+    field_value = self.get_field_value(field_name)
 
     if format not in self.formatters:
       self.raise_error(RuntimeError, f'Format "{format}" is not registered.')
@@ -653,30 +647,28 @@ class MextParser:
       formatter_params = { k.strip(): v.strip()[1:-1] for k, v in map(lambda p: p.split('=', 1), clauses) }
 
     format_res = self.formatters[format](field_value, **formatter_params)
-    if asyncio.iscoroutine(format_res):
-      format_res = await format_res
     self.append_text(format_res)
 
-  async def parse_comment(self):
+  def parse_comment(self):
     self.assert_unexpected_statement()
 
     self.skip_until(['endcomment'], ['comment'], ['endcomment'])
 
-  async def parse_endcomment(self):
+  def parse_endcomment(self):
     self.assert_unexpected_statement()
 
     self.raise_syntax_error(f'Rebundant keyword "endcomment".')
 
-  async def parse_field(self):
-    field_value = await self.get_field_value(self.state.field_name)
+  def parse_field(self):
+    field_value = self.get_field_value(self.state.field_name)
     self.append_text(field_value)
 
   @classmethod
-  async def format_json(self, value):
+  def format_json(self, value):
     return json.dumps(value, indent=2, ensure_ascii=False)
 
   @classmethod
-  async def format_escape(self, value: str, esc_chars: str="\\n"):
+  def format_escape(self, value: str, esc_chars: str="\\n"):
     value = str(value)
     esc_chars = esc_chars.encode().decode('unicode_escape')
     esc_chars = set(esc_chars)

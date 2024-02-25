@@ -26,7 +26,6 @@ def render_mext():
 
   prompt = context_mgr.compose(
     template_fn=args.mextfile,
-    use_async=False,
 
     **params,
   )

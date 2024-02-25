@@ -30,7 +30,7 @@ class TestMextParser(unittest.TestCase):
     parser = MextParser()
     res = parser.parse("""{var}""", params={
       'var': "Pass",
-    }, use_async=False)
+    })
     self.assertEqual(res, "Pass")
 
   def test_option(self):
@@ -41,7 +41,7 @@ class TestMextParser(unittest.TestCase):
     res = parser.parse("""\
 {@option final_strip off}
 Empty line at the end.
-""", use_async=False)
+""")
     self.assertEqual(res, "Empty line at the end.\n")
 
     parser = MextParser()
@@ -50,7 +50,7 @@ Empty line at the end.
 
 Empty line above.""", params={
       'var': "",
-    }, use_async=False)
+    })
     self.assertEqual(res, "\nEmpty line above.")
 
     parser = MextParser()
@@ -59,7 +59,7 @@ Empty line above.""", params={
 {var}
 No empty line above.""", params={
       'var': "",
-    }, use_async=False)
+    })
     self.assertEqual(res, "No empty line above.")
 
   def test_set(self):
@@ -70,7 +70,7 @@ No empty line above.""", params={
 {var1}""", params={
       'var1': "Val1",
       'var2': "Val2",
-    }, use_async=False)
+    })
     self.assertEqual(res, "Val1\nVal2")
 
   def test_default(self):
@@ -79,7 +79,7 @@ No empty line above.""", params={
 {@default var1 var2}
 {var1}""", params={
       'var2': "Val2",
-    }, use_async=False)
+    })
     self.assertEqual(res, "Val2")
 
     res = parser.parse("""\
@@ -87,7 +87,7 @@ No empty line above.""", params={
 {var1}""", params={
       'var1': "Val1",
       'var2': "Val2",
-    }, use_async=False)
+    })
     self.assertEqual(res, "Val1")
 
   def test_count(self):
@@ -96,7 +96,7 @@ No empty line above.""", params={
 {@option final_strip off}
 {@count idx}
 {idx}\
-""", use_async=False)
+""")
     self.assertEqual(res, "0")
 
     res = parser.parse("""\
@@ -106,7 +106,7 @@ No empty line above.""", params={
 {@endfor}\
 """, params={
       'arr': [0, 1, 2, 3],
-    }, use_async=False)
+    })
     self.assertEqual(res, """\
 0. 0
 1. 1
@@ -122,7 +122,7 @@ No empty line above.""", params={
 {@endfor}\
 """, params={
       'arr': [1, 2, 3, 4],
-    }, use_async=False)
+    })
     self.assertEqual(res, """\
 1. 1
 2. 2
@@ -134,50 +134,50 @@ No empty line above.""", params={
     parser = MextParser()
     res = parser.parse("""\
 {@set var1 100}
-{var1}""", use_async=False)
+{var1}""")
     self.assertEqual(res, "100")
 
     res = parser.parse("""\
 {@set var1 100.01}
-{var1}""", use_async=False)
+{var1}""")
     self.assertAlmostEqual(float(res), 100.01)
 
     res = parser.parse("""\
 {@set var1 98765.43210}
-{var1}""", use_async=False)
+{var1}""")
     self.assertAlmostEqual(float(res), 98765.43210)
 
     res = parser.parse("""\
 {@set var1 1e2}
-{var1}""", use_async=False)
+{var1}""")
     self.assertAlmostEqual(float(res), 100.0)
 
     res = parser.parse("""\
 {@set var1 1.0e2}
-{var1}""", use_async=False)
+{var1}""")
     self.assertAlmostEqual(float(res), 100.0)
 
   def test_include(self):
     parser = MextParser()
     res = parser.parse("""{@include prompts.empty_template}""", params={
       'prompts': self.prompts,
-    }, use_async=False)
+    })
     self.assertEqual(res, "")
 
     res = parser.parse("""{@include prompts.template1}""", params={
       'prompts': self.prompts,
-    }, use_async=False)
+    })
     self.assertEqual(res, "Using default value.")
 
     res = parser.parse("""{@include prompts.template1}""", params={
       'prompts': self.prompts,
       'var1': False,
-    }, use_async=False)
+    })
     self.assertEqual(res, "Using additional parameter value.")
 
     res = parser.parse("""{@include prompts.template1 var1=false}""", params={
       'prompts': self.prompts,
-    }, use_async=False)
+    })
     self.assertEqual(res, "Using additional parameter value.")
 
     res = parser.parse("""\
@@ -185,7 +185,7 @@ Included from template1:
 {@include prompts.template1 var1 = false}
 """, params={
       'prompts': self.prompts,
-    }, use_async=False)
+    })
     self.assertEqual(res, "Included from template1:\nUsing additional parameter value.")
 
     res = parser.parse("""\
@@ -193,7 +193,7 @@ Included from template1:
 {@include prompts.template1 var1 = false, var2=true}
 """, params={
       'prompts': self.prompts,
-    }, use_async=False)
+    })
     self.assertEqual(res, "Included from template1:\nUsing additional parameter value.\nAnother variable var2 is True.")
 
   def test_input(self):
@@ -206,7 +206,7 @@ We now know that {name} is {age} year old.
       callbacks={
         'name': lambda x: "Alice",
         'age': lambda x: 19,
-    }, use_async=False)
+    })
     self.assertEqual(res, """\
 name: Alice
 age: 19
@@ -225,7 +225,7 @@ name: {name}
 age: {age}
 """, params={
       'data': self.data,
-    }, use_async=False)
+    })
     self.assertEqual(res, """\
 name: Alice
 age: 19\
@@ -237,7 +237,7 @@ name: {agent[name]}
 age: {agent[age]}
 """, params={
       'data': self.data,
-    }, use_async=False)
+    })
     self.assertEqual(res, """\
 name: Alice
 age: 19\
@@ -249,7 +249,7 @@ name: {agent.name}
 age: {agent.age}
 """, params={
       'data': self.data,
-    }, use_async=False)
+    })
     self.assertEqual(res, """\
 name: Alice
 age: 19\
@@ -259,7 +259,7 @@ age: 19\
 {@import "tests/mext/data/data1.yaml"}
 name: {name}
 age: {age}
-""", use_async=False)
+""")
     self.assertEqual(res, """\
 name: Alice
 age: 19\
@@ -269,7 +269,7 @@ age: 19\
 {@import "tests/mext/data/data1.yaml" as agent}
 name: {agent.name}
 age: {agent.age}
-""", use_async=False)
+""")
     self.assertEqual(res, """\
 name: Alice
 age: 19\
@@ -277,39 +277,39 @@ age: 19\
 
   def test_if(self):
     parser = MextParser()
-    res = parser.parse("""{@if true}True{@else}False{@endif}""", use_async=False)
+    res = parser.parse("""{@if true}True{@else}False{@endif}""")
     self.assertEqual(res, "True")
 
-    res = parser.parse("""{@if false}True{@else}False{@endif}""", use_async=False)
+    res = parser.parse("""{@if false}True{@else}False{@endif}""")
     self.assertEqual(res, "False")
 
     res = parser.parse("""{@if var_true}True{@else}False{@endif}""", params={
       'var_true': True,
-    }, use_async=False)
+    })
     self.assertEqual(res, "True")
 
     res = parser.parse("""{@if var_true}{val_pass}{@else}Failed{@endif}""", params={
       'var_true': True,
       'val_pass': "Pass",
-    }, use_async=False)
+    })
     self.assertEqual(res, "Pass")
 
     res = parser.parse("""{@if var_false}Failed{@else}{val_pass}{@endif}""", params={
       'var_false': False,
       'val_pass': "Pass",
-    }, use_async=False)
+    })
     self.assertEqual(res, "Pass")
 
     res = parser.parse("""{@if not var_true}Failed{@else}{val_pass}{@endif}""", params={
       'var_true': True,
       'val_pass': "Pass",
-    }, use_async=False)
+    })
     self.assertEqual(res, "Pass")
 
     res = parser.parse("""{@if not var_true}Failed{@else}{@if false}Nested Failed{@else}{val_pass}{@endif}{@endif}""", params={
       'var_true': True,
       'val_pass': "Pass",
-    }, use_async=False)
+    })
     self.assertEqual(res, "Pass")
 
   def test_if_operators(self):
@@ -320,10 +320,10 @@ age: 19\
       ({ 'var': None }, False),
     ]
     for params, expected in cases:
-      res = parser.parse("""var is {@if undefined var}undefined{@else}not undefined{@endif}""", params=params, use_async=False)
+      res = parser.parse("""var is {@if undefined var}undefined{@else}not undefined{@endif}""", params=params)
       self.assertEqual(res, f'var is ' + ("undefined" if expected else "not undefined"))
 
-      res = parser.parse("""var is {@if not undefined var}not undefined{@else}undefined{@endif}""", params=params, use_async=False)
+      res = parser.parse("""var is {@if not undefined var}not undefined{@else}undefined{@endif}""", params=params)
       self.assertEqual(res, f'var is ' + ("undefined" if expected else "not undefined"))
 
     cases = [
@@ -338,12 +338,12 @@ age: 19\
     for var, expected in cases:
       res = parser.parse(""""{var}" is {@if empty var}empty{@else}not empty{@endif}""", params={
         'var': var,
-      }, use_async=False)
+      })
       self.assertEqual(res, f'"{var}" is ' + ("empty" if expected else "not empty"))
 
       res = parser.parse(""""{var}" is {@if not empty var}not empty{@else}empty{@endif}""", params={
         'var': var,
-      }, use_async=False)
+      })
       self.assertEqual(res, f'"{var}" is ' + ("empty" if expected else "not empty"))
 
   def test_elif(self):
@@ -358,7 +358,7 @@ Failed
 """,
       params = {
         'var1': True,
-    }, use_async=False)
+    })
     self.assertEqual(res, "Pass")
 
     res = parser.parse("""\
@@ -371,7 +371,7 @@ Failed
 """,
       params = {
         'var1': True,
-    }, use_async=False)
+    })
     self.assertEqual(res, "Pass")
 
     res = parser.parse("""\
@@ -385,7 +385,7 @@ Failed
 {@else}
 Failed
 {@endif}
-""", use_async=False)
+""")
     self.assertEqual(res, "Pass")
 
   def test_for(self):
@@ -399,7 +399,7 @@ Purchase them in the store.
 """,
       params={
         'arr': ["Apple", "Banana", "Pear"],
-    }, use_async=False)
+    })
     self.assertEqual(res, """\
 List of fruits:
 - Apple
@@ -419,7 +419,7 @@ Purchase them in the store.\
           "favorite": "Apple",
           "Age": 19,
         },
-    }, use_async=False)
+    })
     self.assertEqual(res, """\
 name: Alice
 favorite: Apple
@@ -435,7 +435,7 @@ Age: 19\
 """,
       params={
         'arr': [],
-    }, use_async=False)
+    })
     self.assertEqual(res, "")
 
     parser.reset()
@@ -454,7 +454,7 @@ Age: 19\
           { 'name': "Bob", 'pass': False, },
           { 'name': "Alex", 'pass': True, },
         ],
-    }, use_async=False)
+    })
     self.assertEqual(res, """\
 - name: Alice
   pass: True
@@ -470,7 +470,7 @@ Start.
 {@trim_newline}{@if true}{@endif}
 
 End.
-""", use_async=False)
+""")
     self.assertEqual(res, """\
 Start.
 
@@ -485,7 +485,7 @@ Some text.
 {@endif}
 
 End.
-""", use_async=False)
+""")
     self.assertEqual(res, """\
 Start.
 
@@ -502,7 +502,7 @@ Failed
 {@endif}
 
 End.
-""", use_async=False)
+""")
     self.assertEqual(res, """\
 Start.
 
@@ -518,7 +518,7 @@ End.
 """,
       params={
         'prompts': self.prompts,
-    }, use_async=False)
+    })
     self.assertEqual(res, """\
 Start.
 
@@ -534,7 +534,7 @@ End.
 """,
       params={
         'prompts': self.prompts,
-    }, use_async=False)
+    })
     self.assertEqual(res, """\
 Start.
 
@@ -554,7 +554,7 @@ End.
 """,
       params={
         'prompts': self.prompts,
-    }, use_async=False)
+    })
     self.assertEqual(res, """\
 Start.
 
@@ -575,7 +575,7 @@ End.
 """,
       params={
         'prompts': self.prompts,
-    }, use_async=False)
+    })
     self.assertEqual(res, """\
 Start.
 
@@ -594,7 +594,7 @@ End.\
           { 'name': "Alice", 'favorite': "Apple", },
           { 'name': "Bob", 'favorite': "Banana", },
         ],
-    }, use_async=False)
+    })
     self.assertEqual(res, """\
 [
   {
@@ -619,7 +619,7 @@ This is a multi-line paragraph.
 "Sentences like this should be escaped."
 'And this one too.'\
 """,
-    }, use_async=False)
+    })
     self.assertEqual(res, """var1: 'This is a multi-line paragraph.\\n"Sentences like this should be escaped."\\n\\'And this one too.\\''""")
 
   def test_format_escape(self):
@@ -633,7 +633,7 @@ This is a multi-line paragraph.
 "Sentences like this won't be escaped."
 'And this one too.'\
 """,
-    }, use_async=False)
+    })
     self.assertEqual(res, """var1: This is a multi-line paragraph.\\n"Sentences like this won't be escaped."\\n'And this one too.'""")
 
     res = parser.parse("""\
@@ -646,7 +646,7 @@ This is a multi-line paragraph.
         'table': {
           'why': "This is useful for making tables,\none-liner || general escaping like \\.",
         },
-    }, use_async=False)
+    })
     self.assertEqual(res, """\
 |name|desc
 |---|---
@@ -666,7 +666,7 @@ This is a markdown block.
 print('It contains code block.')
 ```\
 """,
-    }, use_async=False)
+    })
     self.assertEqual(res, """\
 Markdown fenced block:
 ````
@@ -687,7 +687,7 @@ print('It contains code block.')
         'table': {
           'why': "This is useful for making tables,\none-liner || general escaping like \\.",
         },
-    }, use_async=False)
+    })
     self.assertEqual(res, """\
 |name|desc
 |---|---
@@ -702,7 +702,7 @@ Comment below.
 {@if true}
 Comment ended.
 {@endif}
-""", use_async=False)
+""")
     self.assertEqual(res, """\
 Comment below.
 Comment ended.\
@@ -719,7 +719,7 @@ Just some more comments.
 {@if true}
 Comment ended.
 {@endif}
-""", use_async=False)
+""")
     self.assertEqual(res, """\
 Comment below.
 Comment ended.\
@@ -734,7 +734,7 @@ Comment ended.\
 """, params={
       'var_true': True,
       'val_pass': "Pass",
-    }, use_async=False)
+    })
     self.assertEqual(res, "Pass")
 
     res = parser.parse("""\
@@ -745,7 +745,7 @@ Is
 """, params={
       'var_true': True,
       'val_pass': "Pass",
-    }, use_async=False)
+    })
     self.assertEqual(res, "Is\nPass")
 
     res = parser.parse("""\
@@ -755,7 +755,7 @@ Is {@if true}
 """, params={
       'var_true': True,
       'val_pass': "Pass",
-    }, use_async=False)
+    })
     self.assertEqual(res, "Is \nPass")
 
     res = parser.parse("""\
@@ -769,7 +769,7 @@ Nested Failed
 """, params={
       'var_true': True,
       'val_pass': "Pass",
-    }, use_async=False)
+    })
     self.assertEqual(res, "Is Pass")
 
     res = parser.parse("""\
@@ -784,7 +784,7 @@ Nested Failed
 """, params={
       'var_true': True,
       'val_pass': "Pass",
-    }, use_async=False)
+    })
     self.assertEqual(res, "Is\n  Pass")
 
     res = parser.parse("""\
@@ -798,7 +798,7 @@ Failed
 """, params={
       'var_true': True,
       'val_pass': "Pass",
-    }, use_async=False)
+    })
     self.assertEqual(res, "Is\n  Pass")
 
     res = parser.parse("""\
@@ -812,7 +812,7 @@ Failed
 """, params={
       'var_true': True,
       'val_pass': "Pass",
-    }, use_async=False)
+    })
     self.assertEqual(res, "Is\n  Pass")
 
     res = parser.parse("""\
@@ -825,7 +825,7 @@ Nested Failed{@else}{val_pass}
 """, params={
       'var_true': True,
       'val_pass': "Pass",
-    }, use_async=False)
+    })
     self.assertEqual(res, "Is Pass")
 
     res = parser.parse("""\
@@ -836,7 +836,7 @@ Failed
 """, params={
       'var_true': True,
       'val_pass': "Pass",
-    }, use_async=False)
+    })
     self.assertEqual(res, "Is Pass")
 
     res = parser.parse("""\
@@ -851,7 +851,7 @@ Failed
 """, params={
       'var_true': True,
       'val_pass': "Pass",
-    }, use_async=False)
+    })
     self.assertEqual(res, "Is\n  Pass")
 
     res = parser.parse("""\
@@ -867,7 +867,7 @@ Failed
 """, params={
       'var_true': True,
       'val_pass': "Pass",
-    }, use_async=False)
+    })
     self.assertEqual(res, "Is\n    Pass")
 
     res = parser.parse("""\
@@ -879,7 +879,7 @@ Failed
 """, params={
       'var_true': True,
       'val_pass': "\nPass",
-    }, use_async=False)
+    })
     self.assertEqual(res, "Is\n  \nPass")
 
     res = parser.parse("""\
@@ -892,7 +892,7 @@ Two
 awesome
 {@endif}
 lines
-""", use_async=False)
+""")
     self.assertEqual(res, """\
 Two
 awesome
@@ -909,7 +909,7 @@ Include an empty template:
 End of the empty template.
 """, params={
       'prompts': self.prompts,
-    }, use_async=False)
+    })
     self.assertEqual(res, """\
 Include an empty template:
 End of the empty template.\
@@ -922,7 +922,7 @@ Include an empty template:
 End of the empty template.
 """, params={
       'prompts': self.prompts,
-    }, use_async=False)
+    })
     self.assertEqual(res, """\
 Include an empty template:
 End of the empty template.\
@@ -936,7 +936,7 @@ Include an empty template:
 End of the empty template.
 """, params={
       'prompts': self.prompts,
-    }, use_async=False)
+    })
     self.assertEqual(res, """\
 Include an empty template:
 End of the empty template.\
@@ -950,7 +950,7 @@ Include an empty template:
 End of the empty template.
 """, params={
       'prompts': self.prompts,
-    }, use_async=False)
+    })
     self.assertEqual(res, """\
 Include an empty template:
 End of the empty template.\
@@ -966,7 +966,7 @@ Include an empty template:
 End of the empty template.
 """, params={
       'arr': [1],
-    }, use_async=False)
+    })
     self.assertEqual(res, """\
 Include an empty template:
 End of the empty template.\
@@ -984,5 +984,5 @@ End of the empty template.\
         lines = f.readlines()
         expected_result = ''.join(lines)
 
-      res = parser.parse(template_fn=template_fn, use_async=False)
+      res = parser.parse(template_fn=template_fn)
       self.assertEqual(res, expected_result)
