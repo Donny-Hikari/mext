@@ -691,7 +691,7 @@ print('It contains code block.')
     self.assertEqual(res, """\
 |name|desc
 |---|---
-|why|This is useful for making tables,\\none-liner \|\| general escaping like \\\\.\
+|why|This is useful for making tables,\\none-liner \\|\\| general escaping like \\\\.\
 """)
 
   def test_comment(self):
