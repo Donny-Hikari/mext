@@ -972,6 +972,23 @@ Include an empty template:
 End of the empty template.\
 """)
 
+    res = parser.parse("""\
+Include some clauses:
+{@if true}
+  {@trim_newline}{@if true}
+Some sentences without indents.
+  {@endif}
+{@endif}
+End of the some clauses.
+""", params={
+      'prompts': self.prompts,
+    })
+    self.assertEqual(res, """\
+Include some clauses:
+Some sentences without indents.
+End of the some clauses.\
+""")
+
   def test_readme(self):
     parser = MextParser()
     readme_files = os.listdir(self.dirs.readme)

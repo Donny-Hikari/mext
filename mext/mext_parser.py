@@ -618,8 +618,12 @@ class MextParser:
   def parse_trim_newline(self):
     self.assert_unexpected_statement()
 
-    self.append_text(self.pending_whitespaces, flush_pending=False)
-    self.pending_whitespaces = ''
+    if self.pending_whitespaces is None:
+      self.pending_whitespaces = ''
+    elif (m := re.match(r'\A\n*', self.pending_whitespaces)) is not None:
+      self.append_text(m[0], flush_pending=False)
+      self.pending_whitespaces = self.pending_whitespaces[len(m[0]):]
+
     self.trim_newline_state.append(ObjDict({
       'level': self.level,
       'pos_mark': len(self.results),
