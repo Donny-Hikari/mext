@@ -1,6 +1,7 @@
 import unittest
 import os
 from os import path
+from enum import Enum
 
 from mext.libs.utils import ObjDict
 from mext import MextParser
@@ -724,6 +725,26 @@ Comment ended.
 Comment below.
 Comment ended.\
 """)
+
+  def test_field(self):
+    parser = MextParser()
+    res = parser.parse("""\
+{a:0.2f}
+""", params={
+      'a': 1.2,
+    })
+    self.assertEqual(res, '1.20')
+
+    class FooEnum(str, Enum):
+      foo = 'foo'
+
+    parser = MextParser()
+    res = parser.parse("""\
+{a}
+""", params={
+      'a': FooEnum.foo,
+    })
+    self.assertEqual(res, 'foo')
 
   def test_if_whitespaces(self):
     parser = MextParser()

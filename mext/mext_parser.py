@@ -665,6 +665,8 @@ class MextParser:
 
   def parse_field(self):
     field_value = self.get_field_value(self.state.field_name)
+    field_value = self.str_formatter.convert_field(field_value, self.state.conversion)
+    field_value = self.str_formatter.format_field(field_value, self.state.format_spec)
     self.append_text(field_value)
 
   @classmethod
