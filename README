@@ -1,6 +1,15 @@
 # Mext
 
-Mext is an prompt template extension for LLM (large language model).
+Mext is a text template language.
+The main target of Mext is to enable readable and powerful prompt templates for LLM (large language model).
+But it is not limited to LLM. Mext also provide human friendly but powerful templates to producing texts.
+
+This README is written with Mext. Source file: [readme_src/README.mext](readme_src/README.mext).
+
+## Early Stage
+
+The Mext language is still in its early stage.
+New syntaxes may be introduced and broken changes might be made.
 
 ## Syntax
 
