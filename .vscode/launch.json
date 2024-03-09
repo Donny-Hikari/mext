@@ -6,7 +6,7 @@
   "configurations": [
     {
       "name": "Render mext",
-      "type": "python",
+      "type": "debugpy",
       "request": "launch",
       "module": "mext.scripts.render_mext",
       "args": [
@@ -16,7 +16,7 @@
     },
     {
       "name": "Test Mext",
-      "type": "python",
+      "type": "debugpy",
       "request": "launch",
       "module": "unittest",
       "args": [

@@ -3,6 +3,7 @@
 # Mext
 
 Mext is a text template language.
+
 The main target of Mext is to enable readable and powerful prompt templates for LLM (large language model).
 But it is not limited to LLM. Mext also provide human friendly but powerful templates to producing texts.
 
@@ -12,6 +13,46 @@ This README is written with Mext. Source file: [readme_src/README.mext](readme_s
 
 The Mext language is still in its early stage.
 New syntaxes may be introduced and broken changes might be made.
+
+## Installation
+
+The default target of make will perform testing, cleanup previous build, and install Mext.
+
+```bash
+make
+```
+
+You may as well use pip install directly:
+
+```bash
+pip install .
+```
+
+## Render Mext file
+
+You can render a Mext file handly with [mext/script/render_mext.py](mext/script/render_mext.py).
+
+Usage:
+
+```bash
+python -m mext.scripts.render_mext readme_src/README.mext -o README.md
+```
+
+Or, if you installed mext, the render script will be installed automatically:
+
+```bash
+render-mext readme_src/README.mext -o README.md
+```
+
+To render this README.md with make:
+
+```bash
+make README.md
+```
+
+This will also render the data file [readme_src/README.yaml](readme_src/README.yaml) from [readme_src/README-yaml.mext](readme_src/README-yaml.mext) and [readme_src/README-yaml.yaml](readme_src/README-yaml.yaml).
+
+The section [Syntax](#Syntax) below best illustrates the purpose of this language. Check out the source file [readme_src/README.mext](readme_src/README.mext).
 
 ## Syntax
 
