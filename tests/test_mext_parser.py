@@ -10,7 +10,7 @@ class TestMextParser(unittest.TestCase):
   dirs = ObjDict({
     'prompts': "tests/mext/prompts",
     'data': "tests/mext/data",
-    'readme': "tests/mext/readme",
+    'readme_syntax': "tests/mext/readme/syntax",
   })
 
   def __init__(self, *args, **kwargs):
@@ -1010,14 +1010,14 @@ Some sentences without indents.
 End of the some clauses.\
 """)
 
-  def test_readme(self):
+  def test_readme_syntax(self):
     parser = MextParser()
-    readme_files = os.listdir(self.dirs.readme)
+    readme_files = os.listdir(self.dirs.readme_syntax)
     readme_templates = filter(lambda x: x.endswith('.mext'), readme_files)
     for tp in readme_templates:
-      template_fn = path.join(self.dirs.readme, tp)
+      template_fn = path.join(self.dirs.readme_syntax, tp)
       tp_base, tp_ext = path.splitext(tp)
-      expected_fn = path.join(self.dirs.readme, f'{tp_base}.md')
+      expected_fn = path.join(self.dirs.readme_syntax, f'{tp_base}.md')
       with open(expected_fn, 'r') as f:
         lines = f.readlines()
         expected_result = ''.join(lines)
