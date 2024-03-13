@@ -58,6 +58,9 @@ class MextParser:
       'repr': repr,
       'escape': MextParser.format_escape,
       'fenced_block': fence_content,
+      'lower': str.lower,
+      'upper': str.upper,
+      'capitalize': str.capitalize,
     }
     for format_name, formatter in default_formattters.items():
       self.register_formatter(format_name, formatter)

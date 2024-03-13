@@ -585,121 +585,6 @@ A line.
 End.\
 """)
 
-  def test_format_json(self):
-    parser = MextParser()
-    res = parser.parse("""\
-{@format json var1}
-""",
-      params={
-        'var1': [
-          { 'name': "Alice", 'favorite': "Apple", },
-          { 'name': "Bob", 'favorite': "Banana", },
-        ],
-    })
-    self.assertEqual(res, """\
-[
-  {
-    "name": "Alice",
-    "favorite": "Apple"
-  },
-  {
-    "name": "Bob",
-    "favorite": "Banana"
-  }
-]\
-""")
-
-  def test_format_repr(self):
-    parser = MextParser()
-    res = parser.parse("""\
-var1: {@format repr var1}
-""",
-      params={
-        'var1': """\
-This is a multi-line paragraph.
-"Sentences like this should be escaped."
-'And this one too.'\
-""",
-    })
-    self.assertEqual(res, """var1: 'This is a multi-line paragraph.\\n"Sentences like this should be escaped."\\n\\'And this one too.\\''""")
-
-  def test_format_escape(self):
-    parser = MextParser()
-    res = parser.parse("""\
-var1: {@format escape var1 esc_chars="\\n"}
-""",
-      params={
-        'var1': """\
-This is a multi-line paragraph.
-"Sentences like this won't be escaped."
-'And this one too.'\
-""",
-    })
-    self.assertEqual(res, """var1: This is a multi-line paragraph.\\n"Sentences like this won't be escaped."\\n'And this one too.'""")
-
-    res = parser.parse("""\
-|name|desc
-|---|---
-{@for name, desc in table}
-|{name}|{@format escape desc esc_chars = "|\\n\\\\"}
-""",
-      params={
-        'table': {
-          'why': "This is useful for making tables,\none-liner || general escaping like \\.",
-        },
-    })
-    self.assertEqual(res, """\
-|name|desc
-|---|---
-|why|This is useful for making tables,\\none-liner \\|\\| general escaping like \\\\.\
-""")
-
-  def test_format_fenced_block(self):
-    parser = MextParser()
-    res = parser.parse("""\
-Markdown fenced block:
-{@format fenced_block var1}
-""",
-      params={
-        'var1': """\
-This is a markdown block.
-```python
-print('It contains code block.')
-```\
-""",
-    })
-    self.assertEqual(res, """\
-Markdown fenced block:
-````
-This is a markdown block.
-```python
-print('It contains code block.')
-```
-````\
-""")
-
-    res = parser.parse("""\
-Markdown fenced block:
-{@format fenced_block var1 spec="markdown"}
-""",
-      params={
-        'var1': """\
-This is a markdown block.
-```python
-print('It contains code block.')
-```\
-""",
-    })
-    self.assertEqual(res, """\
-Markdown fenced block:
-````markdown
-This is a markdown block.
-```python
-print('It contains code block.')
-```
-````\
-""")
-
   def test_comment(self):
     parser = MextParser()
     res = parser.parse("""\
@@ -1031,3 +916,151 @@ End of the some clauses.\
 
         res = parser.parse(template_fn=template_fn)
         self.assertEqual(res, expected_result)
+
+
+class TestBuiltInFormatter(unittest.TestCase):
+  def test_format_json(self):
+    parser = MextParser()
+    res = parser.parse("""\
+{@format json var1}
+""",
+      params={
+        'var1': [
+          { 'name': "Alice", 'favorite': "Apple", },
+          { 'name': "Bob", 'favorite': "Banana", },
+        ],
+    })
+    self.assertEqual(res, """\
+[
+  {
+    "name": "Alice",
+    "favorite": "Apple"
+  },
+  {
+    "name": "Bob",
+    "favorite": "Banana"
+  }
+]\
+""")
+
+  def test_format_repr(self):
+    parser = MextParser()
+    res = parser.parse("""\
+var1: {@format repr var1}
+""",
+      params={
+        'var1': """\
+This is a multi-line paragraph.
+"Sentences like this should be escaped."
+'And this one too.'\
+""",
+    })
+    self.assertEqual(res, """var1: 'This is a multi-line paragraph.\\n"Sentences like this should be escaped."\\n\\'And this one too.\\''""")
+
+  def test_format_escape(self):
+    parser = MextParser()
+    res = parser.parse("""\
+var1: {@format escape var1 esc_chars="\\n"}
+""",
+      params={
+        'var1': """\
+This is a multi-line paragraph.
+"Sentences like this won't be escaped."
+'And this one too.'\
+""",
+    })
+    self.assertEqual(res, """var1: This is a multi-line paragraph.\\n"Sentences like this won't be escaped."\\n'And this one too.'""")
+
+    res = parser.parse("""\
+|name|desc
+|---|---
+{@for name, desc in table}
+|{name}|{@format escape desc esc_chars = "|\\n\\\\"}
+""",
+      params={
+        'table': {
+          'why': "This is useful for making tables,\none-liner || general escaping like \\.",
+        },
+    })
+    self.assertEqual(res, """\
+|name|desc
+|---|---
+|why|This is useful for making tables,\\none-liner \\|\\| general escaping like \\\\.\
+""")
+
+  def test_format_fenced_block(self):
+    parser = MextParser()
+    res = parser.parse("""\
+Markdown fenced block:
+{@format fenced_block var1}
+""",
+      params={
+        'var1': """\
+This is a markdown block.
+```python
+print('It contains code block.')
+```\
+""",
+    })
+    self.assertEqual(res, """\
+Markdown fenced block:
+````
+This is a markdown block.
+```python
+print('It contains code block.')
+```
+````\
+""")
+
+    res = parser.parse("""\
+Markdown fenced block:
+{@format fenced_block var1 spec="markdown"}
+""",
+      params={
+        'var1': """\
+This is a markdown block.
+```python
+print('It contains code block.')
+```\
+""",
+    })
+    self.assertEqual(res, """\
+Markdown fenced block:
+````markdown
+This is a markdown block.
+```python
+print('It contains code block.')
+```
+````\
+""")
+
+  def test_format_lower(self):
+    parser = MextParser()
+    res = parser.parse("""\
+{@format lower var1}
+""",
+      params={
+        'var1': "Capital Letters Become Lower-case",
+    })
+    self.assertEqual(res, "capital letters become lower-case")
+
+  def test_format_upper(self):
+    parser = MextParser()
+    res = parser.parse("""\
+{@format upper var1}
+""",
+      params={
+        'var1': "All Letters Become Upper-case"
+    })
+    self.assertEqual(res, "ALL LETTERS BECOME UPPER-CASE")
+
+  def test_format_capitalize(self):
+    parser = MextParser()
+    res = parser.parse("""\
+{@format capitalize var1}
+""",
+      params={
+        'var1': "first letter get capitalized"
+    })
+    self.assertEqual(res, "First letter get capitalized")
+
