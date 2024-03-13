@@ -14,16 +14,24 @@ New syntaxes may be introduced and broken changes might be made.
 
 ## Installation
 
+Use the following command to install mext.
+
+```bash
+$ pip install mext-lang
+```
+
+To build and install mext from source, clone this repository and use make.
+
 The default target of make will perform testing, cleanup previous build, and install Mext.
 
 ```bash
-make
+$ make
 ```
 
-You may as well use pip install directly:
+You may as well use pip to install an editable version directly:
 
 ```bash
-pip install .
+$ pip install -e .
 ```
 
 ## Render Mext file
@@ -33,24 +41,24 @@ You can render a Mext file handly with [mext/script/render_mext.py](mext/script/
 Usage:
 
 ```bash
-python -m mext.scripts.render_mext readme_src/README.mext -o README.md
+$ python -m mext.scripts.render_mext readme_src/README.mext -o README.md
 ```
 
 Or, if you installed mext, the render script will be installed automatically:
 
 ```bash
-render-mext readme_src/README.mext -o README.md
+$ render-mext readme_src/README.mext -o README.md
 ```
 
 To render this README.md with make:
 
 ```bash
-make README.md
+$ make README.md
 ```
 
 This will also render the data file [readme_src/README.yaml](readme_src/README.yaml) from [readme_src/README-yaml.mext](readme_src/README-yaml.mext) and [readme_src/README-yaml.yaml](readme_src/README-yaml.yaml).
 
-## Usage as a prompt template language
+## Usage as a template language
 
 ## Basic usage
 
@@ -86,10 +94,10 @@ The name is: {@if not novalue name}{name}{@else}Unknown{@endif}
 
 Python:
 ```python
-import Mext
+from mext import Mext
 
 mext = Mext()
-mext.set_template(template_fn="template1.mext")
+mext.set_template(template_fn="reuse.mext")
 
 prompt = mext.compose()
 print(prompt)
@@ -106,7 +114,7 @@ The name is: Sydney
 
 ## Syntax
 
-Note although the @import syntax is used in most of the examples in this section, in production it is more often that variables are passed to `Mext.compose` as parameters directly. Check out the section [Usage as a prompt template language](#Usage%20as%20a%20prompt%20template%20language) as well.
+Note although the @import syntax is used in most of the examples in this section, in production it is more often that variables are passed to `Mext.compose` as parameters directly. Check out the section [Usage as a template language](#Usage%20as%20a%20template%20language) as well.
 
 ### if
 

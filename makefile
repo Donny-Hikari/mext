@@ -5,7 +5,7 @@ install:
 	pip install .
 
 clean:
-	python setup.py clean --all
+	rm -rdf dist/ build/ mext_lang.egg-info/
 
 test:
 	python -m unittest tests.test
@@ -13,7 +13,7 @@ test:
 readme_src/README.yaml: readme_src/README-yaml.yaml readme_src/README-yaml.mext
 	python -m mext.scripts.render_mext readme_src/README-yaml.mext -o readme_src/README.yaml
 
-README.md: readme_src/README.yaml readme_src/README.mext readme_src/syntax.mext readme_src/template_language_usage.mext
+README.md: readme_src/*
 	python -m mext.scripts.render_mext readme_src/README.mext -o README.md
 
 docs/syntax.md: readme_src/README.yaml readme_src/syntax.mext
