@@ -22,7 +22,7 @@ template_language_usage:
   {@for usage in template_language_usage}
   - name: {usage[name]}
     title: {usage[title]}
-    intro: {usage[intro]}
+    intro: '{usage[intro]}'
     {@if not novalue usage[has_template]}
       {@if usage[has_template]}
     template: tests/mext/readme/template_language_usage/{usage[name]}.mext

@@ -2,6 +2,19 @@
 
 Note although the @import syntax is used in most of the examples, in production it is more often that variables are passed to `Mext.compose` as parameters directly. Check out [Usage as a template language](./usage_as_a_template_language.md) as well.
 
+* [if](#if)
+* [for](#for)
+* [trim_newline](#trim_newline)
+* [format](#format)
+* [import](#import)
+* [include](#include)
+* [input](#input)
+* [option](#option)
+* [set](#set)
+* [default](#default)
+* [count](#count)
+* [comment](#comment)
+
 ### if
 
 Template:

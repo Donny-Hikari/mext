@@ -5,10 +5,14 @@
 {@endif}
 
 {@for usage in template_language_usage}
+* [{usage[title]}](#{@format lower usage[name]})
+{@endfor}
+
+{@for usage in template_language_usage}
 {@if is_standalone}
-## {usage[title]}
+## {usage[title]} <a id="{usage[name]}"></a>
 {@else}
-### {usage[title]}
+### {usage[title]} <a id="{usage[name]}"></a>
 {@endif}
 
 {usage[intro]}

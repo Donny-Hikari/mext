@@ -9,10 +9,18 @@ But it is not limited to LLM. Mext also provide human friendly but powerful temp
 
 This README is written with Mext. Source file: [readme_src/README.mext](readme_src/README.mext).
 
-## Early Stage
+### Early Stage
 
 The Mext language is still in its early stage.
 New syntaxes may be introduced and broken changes might be made.
+
+## Table of content
+
+* [Installation](#installation)
+* [Development](#development)
+* [Render Mext file](#render-mext-file)
+* [Usage as a template language](#usage-as-a-template-language)
+* [Syntax](#syntax)
 
 ## Installation
 
@@ -74,7 +82,7 @@ This will also render the data file [readme_src/README.yaml](readme_src/README.y
 
 ## Syntax
 
-Note although the @import syntax is used in most of the examples in this section, in production it is more often that variables are passed to `Mext.compose` as parameters directly. Check out the section [Usage as a template language](#Usage%20as%20a%20template%20language) as well.
+Note although the @import syntax is used in most of the examples in this section, in production it is more often that variables are passed to `Mext.compose` as parameters directly. Check out the section [Usage as a template language](<#usage-as-a-template-language>) as well.
 
 {@comment} As "README.yaml" is @import in "template_language.mext" and "syntax.mext", passing `syntaxes=syntaxes` is not necessary. {@endcomment}
 {@include "syntax.mext" is_standalone=false}

@@ -7,6 +7,10 @@ Note although the @import syntax is used in most of the examples, in production 
 {@endif}
 
 {@for syntax in syntaxes}
+* [{syntax[name]}](#{@format lower syntax[name]})
+{@endfor}
+
+{@for syntax in syntaxes}
 ### {syntax[name]}
 
 Template:

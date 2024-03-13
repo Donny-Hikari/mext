@@ -69,18 +69,23 @@ syntaxes:
 template_language_usage:
   - name: basic
     title: Basic usage
-    intro: To compose a template with Mext, use `Mext.compose`.
+    intro: 'To compose a template with Mext, use `Mext.compose`.'
     python: tests/mext/readme/template_language_usage/basic.py
     result: tests/mext/readme/template_language_usage/basic.out
   - name: reuse
     title: Reuse template
-    intro: You can set a template and use different variables with it.
+    intro: 'You can set a template and use different variables with it.'
     template: tests/mext/readme/template_language_usage/reuse.mext
     python: tests/mext/readme/template_language_usage/reuse.py
     result: tests/mext/readme/template_language_usage/reuse.out
   - name: with_template
-    title: Using with statement
-    intro: You can use `use_template` and `use_params` with the `with` statement.
+    title: Use with statement
+    intro: 'You can use `use_template` and `use_params` with the `with` statement.'
     template: tests/mext/readme/template_language_usage/with_template.mext
     python: tests/mext/readme/template_language_usage/with_template.py
     result: tests/mext/readme/template_language_usage/with_template.out
+  - name: register_formatter
+    title: Use custom formatters
+    intro: '`register_formatter` is a powerful function that enables custom functions for text processing.'
+    python: tests/mext/readme/template_language_usage/register_formatter.py
+    result: tests/mext/readme/template_language_usage/register_formatter.out

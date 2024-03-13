@@ -45,6 +45,9 @@ template_language_usage:
     intro: You can set a template and use different variables with it.
     has_template: True
   - name: with_template
-    title: Using with statement
+    title: Use with statement
     intro: You can use `use_template` and `use_params` with the `with` statement.
     has_template: True
+  - name: register_formatter
+    title: Use custom formatters
+    intro: '`register_formatter` is a powerful function that enables custom functions for text processing.'

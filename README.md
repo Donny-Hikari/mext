@@ -7,10 +7,18 @@ But it is not limited to LLM. Mext also provide human friendly but powerful temp
 
 This README is written with Mext. Source file: [readme_src/README.mext](readme_src/README.mext).
 
-## Early Stage
+### Early Stage
 
 The Mext language is still in its early stage.
 New syntaxes may be introduced and broken changes might be made.
+
+## Table of content
+
+* [Installation](#installation)
+* [Development](#development)
+* [Render Mext file](#render-mext-file)
+* [Usage as a template language](#usage-as-a-template-language)
+* [Syntax](#syntax)
 
 ## Installation
 
@@ -68,7 +76,12 @@ This will also render the data file [readme_src/README.yaml](readme_src/README.y
 
 ## Usage as a template language
 
-### Basic usage
+* [Basic usage](#basic)
+* [Reuse template](#reuse)
+* [Use with statement](#with_template)
+* [Use custom formatters](#register_formatter)
+
+### Basic usage <a id="basic"></a>
 
 To compose a template with Mext, use `Mext.compose`.
 
@@ -91,7 +104,7 @@ Output:
 This is an example template.
 The name is: Yamato
 ```
-### Reuse template
+### Reuse template <a id="reuse"></a>
 
 You can set a template and use different variables with it.
 
@@ -119,7 +132,7 @@ Output:
 The name is: Unknown
 The name is: Sydney
 ```
-### Using with statement
+### Use with statement <a id="with_template"></a>
 
 You can use `use_template` and `use_params` with the `with` statement.
 
@@ -150,10 +163,49 @@ name: Mike
 title: AI Software Engineer
 backend: Claude 3
 ```
+### Use custom formatters <a id="register_formatter"></a>
+
+`register_formatter` is a powerful function that enables custom functions for text processing.
+
+Python:
+```python
+from mext import Mext, MextParser
+from urllib.parse import quote
+
+parser = MextParser()
+parser.register_formatter('encode_uri_component', quote) # register a custom formatter 'encode_uri_component'
+
+mext = Mext()
+mext.set_parser(parser)
+prompt = mext.compose(template="""
+{@format encode_uri_component var}
+""", params={
+  'var': "there are some spaces in this sentence",
+})
+print(prompt)
+```
+
+Output:
+```plaintext
+there%20are%20some%20spaces%20in%20this%20sentence
+```
 
 ## Syntax
 
-Note although the @import syntax is used in most of the examples in this section, in production it is more often that variables are passed to `Mext.compose` as parameters directly. Check out the section [Usage as a template language](#Usage%20as%20a%20template%20language) as well.
+Note although the @import syntax is used in most of the examples in this section, in production it is more often that variables are passed to `Mext.compose` as parameters directly. Check out the section [Usage as a template language](<#usage-as-a-template-language>) as well.
+
+* [if](#if)
+* [for](#for)
+* [trim_newline](#trim_newline)
+* [format](#format)
+* [import](#import)
+* [include](#include)
+* [input](#input)
+* [option](#option)
+* [set](#set)
+* [default](#default)
+* [count](#count)
+* [comment](#comment)
 
 ### if
 

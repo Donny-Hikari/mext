@@ -1,6 +1,11 @@
 # Usage as a template language
 
-## Basic usage
+* [Basic usage](#basic)
+* [Reuse template](#reuse)
+* [Use with statement](#with_template)
+* [Use custom formatters](#register_formatter)
+
+## Basic usage <a id="basic"></a>
 
 To compose a template with Mext, use `Mext.compose`.
 
@@ -23,7 +28,7 @@ Output:
 This is an example template.
 The name is: Yamato
 ```
-## Reuse template
+## Reuse template <a id="reuse"></a>
 
 You can set a template and use different variables with it.
 
@@ -51,7 +56,7 @@ Output:
 The name is: Unknown
 The name is: Sydney
 ```
-## Using with statement
+## Use with statement <a id="with_template"></a>
 
 You can use `use_template` and `use_params` with the `with` statement.
 
@@ -81,4 +86,30 @@ This is the profile of Mike:
 name: Mike
 title: AI Software Engineer
 backend: Claude 3
+```
+## Use custom formatters <a id="register_formatter"></a>
+
+`register_formatter` is a powerful function that enables custom functions for text processing.
+
+Python:
+```python
+from mext import Mext, MextParser
+from urllib.parse import quote
+
+parser = MextParser()
+parser.register_formatter('encode_uri_component', quote) # register a custom formatter 'encode_uri_component'
+
+mext = Mext()
+mext.set_parser(parser)
+prompt = mext.compose(template="""
+{@format encode_uri_component var}
+""", params={
+  'var': "there are some spaces in this sentence",
+})
+print(prompt)
+```
+
+Output:
+```plaintext
+there%20are%20some%20spaces%20in%20this%20sentence
 ```
