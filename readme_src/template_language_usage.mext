@@ -5,7 +5,11 @@
 {@endif}
 
 {@for usage in template_language_usage}
+{@if is_standalone}
 ## {usage[title]}
+{@else}
+### {usage[title]}
+{@endif}
 
 {usage[intro]}
 

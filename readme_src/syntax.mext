@@ -10,10 +10,8 @@ Note although the @import syntax is used in most of the examples, in production 
 ### {syntax[name]}
 
 Template:
-````mext
 {@import syntax[template] as template}
-{template}
-````
+{@format fenced_block template spec="mext"}
 
 {@trim_newline}
 {@if syntax[has_params]}

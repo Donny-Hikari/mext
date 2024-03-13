@@ -5,7 +5,7 @@ Note although the @import syntax is used in most of the examples, in production 
 ### if
 
 Template:
-````mext
+```mext
 {@import "if.yaml"}
 
 {@if true}
@@ -30,7 +30,7 @@ var2 is undefined.
 {@if novalue var2}
 var2 has no value.
 {@endif}
-````
+```
 
 Given params:
 ````json
@@ -54,7 +54,7 @@ var2 has no value.
 ### for
 
 Template:
-````mext
+```mext
 {@import "for.yaml"}
 
 ## Array
@@ -68,7 +68,7 @@ Template:
 - key: {item_key}
   val: {item_val}
 {@endfor}
-````
+```
 
 Given params:
 ````json
@@ -108,7 +108,7 @@ Produce:
 ### trim_newline
 
 Template:
-````mext
+```mext
 @trim_newline if the following next blocks produce empty result until it meets a non-empty block.
 {@trim_newline}
 {@if false}
@@ -124,7 +124,7 @@ This will be shown right after the line above.
 The above and the next new line will not be trimed.
 
 The end.
-````
+```
 
 Produce:
 ````markdown
@@ -139,11 +139,11 @@ The end.
 ### format
 
 Template:
-````mext
+```mext
 {@import "format.yaml"}
 @format a variable using given format. Formatters can be registered with `parser.register_formatter`.
 {@format json var}
-````
+```
 
 Given params:
 ````json
@@ -338,12 +338,12 @@ parser.parse(
 ### option
 
 Template:
-````mext
+```mext
 @option controls the behavior of the parser.
 {@option final_strip off}
 This will keep the empty line below.
 
-````
+```
 
 Produce:
 ````plaintext
@@ -355,7 +355,7 @@ This will keep the empty line below.
 ### set
 
 Template:
-````mext
+```mext
 {@import "set.yaml"}
 @set will overwrite the variable.
 {@set var false}
@@ -364,7 +364,7 @@ var is true.
 {@else}
 var is false.
 {@endif}
-````
+```
 
 Given params:
 ````json
@@ -382,7 +382,7 @@ var is false.
 ### default
 
 Template:
-````mext
+```mext
 @default will not overwrite the variable.
 {@default var false}
 {@if var}
@@ -399,7 +399,7 @@ var is true.
 {@else}
 var is false.
 {@endif}
-````
+```
 
 Given params:
 ````json
@@ -420,7 +420,7 @@ var is true.
 ### count
 
 Template:
-````mext
+```mext
 {@import "count.yaml"}
 
 {@set idx 0}
@@ -428,7 +428,7 @@ Template:
 {@count idx}
 {idx}. {item}
 {@endfor}
-````
+```
 
 Given params:
 ````json
@@ -451,12 +451,12 @@ Produce:
 ### comment
 
 Template:
-````mext
+```mext
 @comment will not be shown in the result.
 {@comment}
 This will be ignored.
 {@endcomment}
-````
+```
 
 Produce:
 ````markdown
