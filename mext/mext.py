@@ -14,9 +14,13 @@ class Mext:
   PROMPT_CACHE = {}
 
   def __init__(self):
+    self.parser = MextParser()
     self.template = ""
     self.params = {}
     self.callbacks = {}
+
+  def set_parser(self, parser: MextParser):
+    self.parser = parser
 
   @contextmanager
   def use_template(self, template=None, template_fn=None):
@@ -90,25 +94,19 @@ class Mext:
 
     return prompt
 
-  def compose(self, template=None, template_fn=None, callbacks={},
+  def compose(self, template=None, template_fn=None, params={}, callbacks={},
       **kwargs) -> Union[str, Tuple[str, dict]]:
-    """
-    The template will be formatted using the params provided.
-
-    Supported syntax:
-    @input_{ARGNAME} Call callbacks[ARGNAME] with the string composed up to this point to get the value if ARGNAME is not provided as a param. Or else use param[ARGNAME].
-    @include_{FILEARG} Compose using template_fn=params[FILEARG] first.
-    """
     if template is None and template_fn is None:
       template = self.template
       template_fn = self.template_fn
 
     all_kwargs = {
       **self.params,
+      **params,
       **kwargs,
     }
 
-    parser = MextParser()
+    parser = self.parser
     parsed_result = parser.parse(template=template, template_fn=template_fn, params=all_kwargs, callbacks=callbacks, template_loader=self._load_template)
 
     if len(callbacks) == 0:
