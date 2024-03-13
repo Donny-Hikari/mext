@@ -1,0 +1,41 @@
+{@import "README.yaml"}
+{@default is_standalone true}
+{@if is_standalone}
+# Render prompts for LLM
+{@endif}
+
+Mext can be integrated into existing LLM pipeline easily.
+
+### Integration with Langchain
+
+Mext template:
+```mext
+{@import "../examples/prompts_for_llm.mext" as mext_template}
+{mext_template}
+```
+
+Python:
+```python
+{@import "../examples/prompts_for_llm.py" as python_code}
+{python_code}
+```
+
+Example output:
+```plaintext
+==== PROMPT ====
+Answer the following questions one by one:
+- The distance of sun to earth
+- Who is Alan Turing
+- What is the name of the planet where the Foundation established?
+
+Answer:
+==== OUTPUT ====
+1. The distance of the sun to earth is approximately 93 million miles.
+2. Alan Turing was a British mathematician, logician, and computer scientist who is considered one of the founding fathers of computer science.
+3. The name of the planet where the Foundation established is Terminus.
+```
+
+You can run this example with:
+```bash
+$ python examples/prompts_for_llm.py
+```

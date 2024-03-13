@@ -20,6 +20,7 @@ New syntaxes may be introduced and broken changes might be made.
 * [Development](#development)
 * [Render Mext file](#render-mext-file)
 * [Usage as a template language](#usage-as-a-template-language)
+* [Render prompts for LLM](#render-prompts-for-llm)
 * [Syntax](#syntax)
 
 ## Installation
@@ -78,7 +79,11 @@ This will also render the data file [readme_src/README.yaml](readme_src/README.y
 
 ## Usage as a template language
 
-{@include "template_language_usage.mext" syntaxes=syntaxes, is_standalone=false}
+{@include "template_language_usage.mext" is_standalone=false}
+
+## Render prompts for LLM
+
+{@include "render_prompts_for_llm.mext" is_standalone=false}
 
 ## Syntax
 
