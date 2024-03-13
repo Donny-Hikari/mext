@@ -35,11 +35,7 @@ class CFG:
     '.yaml': 'yaml',
     '.yml': 'yaml',
   }
-
-  @classmethod
-  @property
-  def supported_extensions(cls):
-    return CFG.Extension2FileType.keys()
+  supported_extensions = Extension2FileType.keys()
 
   @classmethod
   def load_config_as_objdict(cls, fn, filetype='auto'):

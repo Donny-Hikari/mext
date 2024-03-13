@@ -6,7 +6,7 @@ authors = [
 ]
 description = "Mext is a text template language that is useful for creating prompts for LLM."
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 dependencies = [
   "pyyaml>=5.1",
 ]
