@@ -455,7 +455,7 @@ class MextParser:
         if path.exists(import_fn):
           file_found = True
       if not file_found:
-        self.raise_error(FileNotFoundError, f'File not found: "{parts["filepath"]}".')
+        self.raise_error(FileNotFoundError, f'File not found: "{parts["filepath"] or import_fn}".')
 
     varname = parts['namespace']
 

@@ -1018,9 +1018,11 @@ End of the some clauses.\
       template_fn = path.join(self.dirs.readme_syntax, tp)
       tp_base, tp_ext = path.splitext(tp)
       expected_fn = path.join(self.dirs.readme_syntax, f'{tp_base}.md')
-      with open(expected_fn, 'r') as f:
-        lines = f.readlines()
-        expected_result = ''.join(lines)
 
-      res = parser.parse(template_fn=template_fn)
-      self.assertEqual(res, expected_result)
+      with self.subTest(msg=f'File "{tp}"'):
+        with open(expected_fn, 'r') as f:
+          lines = f.readlines()
+          expected_result = ''.join(lines)
+
+        res = parser.parse(template_fn=template_fn)
+        self.assertEqual(res, expected_result)
