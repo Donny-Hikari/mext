@@ -1,0 +1,33 @@
+{@import "README.yaml"}
+{@default is_standalone true}
+{@trim_newline}{@if is_standalone}
+# Syntax
+
+Note although the @import syntax is used in most of the examples, in production it is more often that variables are passed to `Mext.compose` as parameters directly. Check out [Usage as a template language](./usage_as_a_template_language.md) as well.
+{@endif}
+
+{@for syntax in syntaxes}
+### {syntax[name]}
+
+Template:
+````mext
+{@import syntax[template] as template}
+{template}
+````
+
+{@trim_newline}
+{@if syntax[has_params]}
+{@import syntax[params] as params}
+Given params:
+````json
+{@format json params}
+````
+{@endif}
+
+Produce:
+````markdown
+{@import syntax[result] as result}
+{result}
+````
+
+{@endfor}

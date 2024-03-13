@@ -54,3 +54,15 @@ syntaxes:
     template: tests/mext/readme/syntax/comment.mext
     has_params: False
     result: tests/mext/readme/syntax/comment.md
+template_language_usage:
+  - name: basic
+    title: Basic usage
+    intro: To compose a template with Mext, use `Mext.compose`.
+    python: tests/mext/readme/template_language_usage/basic.py
+    result: tests/mext/readme/template_language_usage/basic.out
+  - name: reuse
+    title: Reuse template
+    intro: You can set a template and use different variables with it.
+    template: tests/mext/readme/template_language_usage/reuse.mext
+    python: tests/mext/readme/template_language_usage/reuse.py
+    result: tests/mext/readme/template_language_usage/reuse.out

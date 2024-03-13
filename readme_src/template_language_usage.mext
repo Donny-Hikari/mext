@@ -1,0 +1,31 @@
+{@import "README.yaml"}
+{@default is_standalone true}
+{@if is_standalone}
+# Usage as a template language
+{@endif}
+
+{@for usage in template_language_usage}
+## {usage[title]}
+
+{usage[intro]}
+
+{@trim_newline}{@if not novalue usage[template]}
+Given a tempalte file:
+```mext
+{@import usage[template] as mext_template}
+{mext_template}
+```
+{@endif}
+
+Python:
+```python
+{@import usage[python] as python_code}
+{python_code}
+```
+
+Output:
+```plaintext
+{@import usage[result] as output_result}
+{output_result}
+```
+{@endfor}

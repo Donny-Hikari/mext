@@ -13,3 +13,16 @@ syntaxes:
     {@endif}
     result: tests/mext/readme/syntax/{syntax[name]}.md
   {@endfor}
+template_language_usage:
+  {@for usage in template_language_usage}
+  - name: {usage[name]}
+    title: {usage[title]}
+    intro: {usage[intro]}
+    {@if not novalue usage[has_template]}
+      {@if usage[has_template]}
+    template: tests/mext/readme/template_language_usage/{usage[name]}.mext
+      {@endif}
+    {@endif}
+    python: tests/mext/readme/template_language_usage/{usage[name]}.py
+    result: tests/mext/readme/template_language_usage/{usage[name]}.out
+  {@endfor}

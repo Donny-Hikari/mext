@@ -35,3 +35,11 @@ syntaxes:
   - name: comment
     ignored_mext: False
     has_input: False
+template_language_usage:
+  - name: basic
+    title: Basic usage
+    intro: To compose a template with Mext, use `Mext.compose`.
+  - name: reuse
+    title: Reuse template
+    intro: You can set a template and use different variables with it.
+    has_template: True

@@ -2,7 +2,7 @@
 
 # Mext
 
-Mext is a text template language.
+Mext is a text template language that is useful for creating prompts for LLM.
 
 The main target of Mext is to enable readable and powerful prompt templates for LLM (large language model).
 But it is not limited to LLM. Mext also provide human friendly but powerful templates to producing texts.
@@ -52,32 +52,13 @@ make README.md
 
 This will also render the data file [readme_src/README.yaml](readme_src/README.yaml) from [readme_src/README-yaml.mext](readme_src/README-yaml.mext) and [readme_src/README-yaml.yaml](readme_src/README-yaml.yaml).
 
-The section [Syntax](#Syntax) below best illustrates the purpose of this language. Check out the source file [readme_src/README.mext](readme_src/README.mext).
+## Usage as a template language
+
+{@include "template_language_usage.mext" syntaxes=syntaxes, is_standalone=false}
 
 ## Syntax
 
-{@for syntax in syntaxes}
-### {syntax[name]}
+Note although the @import syntax is used in most of the examples in this section, in production it is more often that variables are passed to `Mext.compose` as parameters directly. Check out the section [Usage as a template language](#Usage%20as%20a%20template%20language) as well.
 
-Template:
-````mext
-{@import syntax[template] as template}
-{template}
-````
-
-{@trim_newline}
-{@if syntax[has_params]}
-{@import syntax[params] as params}
-Given params:
-````json
-{@format json params}
-````
-{@endif}
-
-Produce:
-````markdown
-{@import syntax[result] as result}
-{result}
-````
-
-{@endfor}
+{@comment} As "README.yaml" is @import in "template_language.mext" and "syntax.mext", passing `syntaxes=syntaxes` is not necessary. {@endcomment}
+{@include "syntax.mext" is_standalone=false}
