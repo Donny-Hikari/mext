@@ -10,7 +10,7 @@
 {usage[intro]}
 
 {@trim_newline}{@if not novalue usage[template]}
-Given a tempalte file:
+Given a tempalte file `{usage[name]}.mext`:
 ```mext
 {@import usage[template] as mext_template}
 {mext_template}

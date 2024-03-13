@@ -4,56 +4,68 @@ syntaxes:
     has_params: True
     params: tests/mext/readme/syntax/if.yaml
     result: tests/mext/readme/syntax/if.md
+    result_in_plaintext: False
   - name: for
     template: tests/mext/readme/syntax/for.mext
     has_params: True
     params: tests/mext/readme/syntax/for.yaml
     result: tests/mext/readme/syntax/for.md
+    result_in_plaintext: False
   - name: trim_newline
     template: tests/mext/readme/syntax/trim_newline.mext
     has_params: False
     result: tests/mext/readme/syntax/trim_newline.md
+    result_in_plaintext: False
   - name: format
     template: tests/mext/readme/syntax/format.mext
     has_params: True
     params: tests/mext/readme/syntax/format.yaml
     result: tests/mext/readme/syntax/format.md
+    result_in_plaintext: False
   - name: import
     template: tests/mext/readme/syntax/import.mext
     has_params: True
     params: tests/mext/readme/syntax/import.yaml
     result: tests/mext/readme/syntax/import.md
+    result_in_plaintext: False
   - name: include
     template: tests/mext/readme/syntax/include.mext
     has_params: False
     result: tests/mext/readme/syntax/include.md
+    result_in_plaintext: False
   - name: input
     template: tests/mext/readme/syntax/input.mext.ignore
     has_params: False
     result: tests/mext/readme/syntax/input.md
+    result_in_plaintext: False
   - name: option
     template: tests/mext/readme/syntax/option.mext
     has_params: False
     result: tests/mext/readme/syntax/option.md
+    result_in_plaintext: True
   - name: set
     template: tests/mext/readme/syntax/set.mext
     has_params: True
     params: tests/mext/readme/syntax/set.yaml
     result: tests/mext/readme/syntax/set.md
+    result_in_plaintext: False
   - name: default
     template: tests/mext/readme/syntax/default.mext
     has_params: True
     params: tests/mext/readme/syntax/default.yaml
     result: tests/mext/readme/syntax/default.md
+    result_in_plaintext: False
   - name: count
     template: tests/mext/readme/syntax/count.mext
     has_params: True
     params: tests/mext/readme/syntax/count.yaml
     result: tests/mext/readme/syntax/count.md
+    result_in_plaintext: False
   - name: comment
     template: tests/mext/readme/syntax/comment.mext
     has_params: False
     result: tests/mext/readme/syntax/comment.md
+    result_in_plaintext: False
 template_language_usage:
   - name: basic
     title: Basic usage
@@ -66,3 +78,9 @@ template_language_usage:
     template: tests/mext/readme/template_language_usage/reuse.mext
     python: tests/mext/readme/template_language_usage/reuse.py
     result: tests/mext/readme/template_language_usage/reuse.out
+  - name: with_template
+    title: Using with statement
+    intro: You can use `use_template` and `use_params` with the `with` statement.
+    template: tests/mext/readme/template_language_usage/with_template.mext
+    python: tests/mext/readme/template_language_usage/with_template.py
+    result: tests/mext/readme/template_language_usage/with_template.out

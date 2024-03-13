@@ -12,6 +12,11 @@ syntaxes:
     params: tests/mext/readme/syntax/{syntax[name]}.yaml
     {@endif}
     result: tests/mext/readme/syntax/{syntax[name]}.md
+    {@set result_in_plaintext false}
+    {@if not novalue syntax[result_in_plaintext]}
+      {@set result_in_plaintext syntax[result_in_plaintext]}
+    {@endif}
+    result_in_plaintext: {result_in_plaintext}
   {@endfor}
 template_language_usage:
   {@for usage in template_language_usage}

@@ -346,7 +346,7 @@ This will keep the empty line below.
 ````
 
 Produce:
-````markdown
+````plaintext
 @option controls the behavior of the parser.
 This will keep the empty line below.
 

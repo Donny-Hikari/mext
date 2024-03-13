@@ -23,6 +23,7 @@ syntaxes:
   - name: option
     ignored_mext: False
     has_input: False
+    result_in_plaintext: True
   - name: set
     ignored_mext: False
     has_input: True
@@ -42,4 +43,8 @@ template_language_usage:
   - name: reuse
     title: Reuse template
     intro: You can set a template and use different variables with it.
+    has_template: True
+  - name: with_template
+    title: Using with statement
+    intro: You can use `use_template` and `use_params` with the `with` statement.
     has_template: True

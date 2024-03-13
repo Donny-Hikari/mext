@@ -46,7 +46,7 @@ $ pip install -e .
 
 ## Render Mext file
 
-You can render a Mext file handly with [mext/script/render_mext.py](mext/script/render_mext.py).
+You can render a Mext file handly with [mext/scripts/render_mext.py](mext/scripts/render_mext.py).
 
 Usage:
 

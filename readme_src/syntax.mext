@@ -25,7 +25,7 @@ Given params:
 {@endif}
 
 Produce:
-````markdown
+````{@if syntax[result_in_plaintext]}plaintext{@else}markdown{@endif}
 {@import syntax[result] as result}
 {result}
 ````
