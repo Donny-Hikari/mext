@@ -12,15 +12,23 @@ class TestMext(unittest.TestCase):
     'template_language_usage': Path("tests/mext/readme/template_language_usage"),
   })
 
-  def test_all(self):
+  def test_template_language_usage(self):
     template_language_usage: Path = self.dirs.template_language_usage
+
+    # make sure to use the developing version
+    env = os.environ.copy()
+    if "PYTHONPATH" not in env:
+      env["PYTHONPATH"] = os.getcwd()
+    else:
+      env["PYTHONPATH"] = os.getcwd() + os.pathsep + env["PYTHONPATH"]
+
     for pyfn in template_language_usage.glob("*.py"):
       expected_fn = pyfn.parent / f'{pyfn.stem}.out'
       with self.subTest(f'File "{pyfn}"'):
         with open(expected_fn, 'r') as f:
           lines = f.readlines()
           expected_result = ''.join(lines)
-        proc = subprocess.run(["python3", pyfn.name], stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, text=True, cwd=pyfn.parent)
+        proc = subprocess.run(["python3", pyfn.name], stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, text=True, cwd=pyfn.parent, env=env)
         stdout = proc.stdout
         if proc.stdout.endswith('\n'):
           stdout = proc.stdout[:-1]

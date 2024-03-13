@@ -20,12 +20,20 @@ Use the following command to install mext.
 $ pip install mext-lang
 ```
 
-To build and install mext from source, clone this repository and use make.
+## Development
+
+To build and install mext from scratch, clone this repository and use `make`.
 
 The default target of make will perform testing, cleanup previous build, and install Mext.
 
 ```bash
 $ make
+```
+
+To perform tests, use:
+
+```bash
+$ make test
 ```
 
 You may as well use pip to install an editable version directly:
