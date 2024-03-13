@@ -651,7 +651,7 @@ This is a multi-line paragraph.
     self.assertEqual(res, """\
 |name|desc
 |---|---
-|why|This is useful for making tables,\\none-liner \|\| general escaping like \\\\.\
+|why|This is useful for making tables,\\none-liner \\|\\| general escaping like \\\\.\
 """)
 
   def test_format_fenced_block(self):
@@ -679,20 +679,25 @@ print('It contains code block.')
 """)
 
     res = parser.parse("""\
-|name|desc
-|---|---
-{@for name, desc in table}
-|{name}|{@format escape desc esc_chars = "|\\n\\\\"}
+Markdown fenced block:
+{@format fenced_block var1 spec="markdown"}
 """,
       params={
-        'table': {
-          'why': "This is useful for making tables,\none-liner || general escaping like \\.",
-        },
+        'var1': """\
+This is a markdown block.
+```python
+print('It contains code block.')
+```\
+""",
     })
     self.assertEqual(res, """\
-|name|desc
-|---|---
-|why|This is useful for making tables,\\none-liner \\|\\| general escaping like \\\\.\
+Markdown fenced block:
+````markdown
+This is a markdown block.
+```python
+print('It contains code block.')
+```
+````\
 """)
 
   def test_comment(self):
