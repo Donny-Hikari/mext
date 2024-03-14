@@ -1,10 +1,10 @@
 [project]
 name = "mext-lang"
-version = "0.1.0"
+version = "0.1.1"
 authors = [
   { name = "Dongning Chen", email = "donny.hikari@gmail.com" },
 ]
-description = "Mext is a text template language that is useful for creating prompts for LLM."
+description = "Mext is a powerful text template language designed for crafting prompts for LLM models."
 readme = "README.md"
 requires-python = ">=3.8"
 dependencies = [
@@ -20,6 +20,7 @@ classifiers = [
 file = "LICENSE"
 
 [project.urls]
+homepage = "https://github.com/donny-hikari/mext"
 source = "https://github.com/donny-hikari/mext"
 
 [project.scripts]

@@ -1,6 +1,6 @@
 # Mext
 
-Mext is a text template language that is useful for creating prompts for LLM.
+Mext is a powerful text template language designed for crafting prompts for LLM models.
 
 The main target of Mext is to enable readable and powerful prompt templates for LLM (large language model).
 But it is not limited to LLM. Mext also provide human friendly but powerful templates to producing texts.
