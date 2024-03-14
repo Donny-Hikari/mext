@@ -2,6 +2,8 @@
 {@default is_standalone true}
 {@if is_standalone}
 # Usage as a template language
+
+Check out the syntax of Mext as well: [Syntax](./syntax.md)
 {@endif}
 
 {@for usage in template_language_usage}

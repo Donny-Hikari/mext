@@ -2,10 +2,11 @@
 
 # Mext
 
-Mext is a powerful text template language designed for crafting prompts for LLM models.
+Mext is a powerful text template language designed for crafting prompts for LLM.
 
-The main target of Mext is to enable readable and powerful prompt templates for LLM (large language model).
-But it is not limited to LLM. Mext also provide human friendly but powerful templates to producing texts.
+The primary objective of Mext is to provide human friendly yet powerful prompt templates for LLM (large language model), emphasizing readability and adaptability.
+
+At the same time, the versatility of Mext extends its utility beyond, making it a powerful tool for a wide array of text manipulation tasks.
 
 This README is written with Mext. Source file: [readme_src/README.mext](readme_src/README.mext).
 
@@ -78,6 +79,8 @@ $ make README.md
 This will also render the data file [readme_src/README.yaml](readme_src/README.yaml) from [readme_src/README-yaml.mext](readme_src/README-yaml.mext) and [readme_src/README-yaml.yaml](readme_src/README-yaml.yaml).
 
 ## Usage as a template language
+
+Check out the syntax of Mext as well: [Syntax](#syntax)
 
 {@include "template_language_usage.mext" is_standalone=false}
 

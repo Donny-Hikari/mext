@@ -1,5 +1,7 @@
 # Usage as a template language
 
+Check out the syntax of Mext as well: [Syntax](./syntax.md)
+
 * [Basic usage](#basic)
 * [Reuse template](#reuse)
 * [Use with statement](#with_template)

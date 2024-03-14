@@ -1,6 +1,6 @@
 # Syntax
 
-Note although the @import syntax is used in most of the examples, in production it is more often that variables are passed to `Mext.compose` as parameters directly. Check out [Usage as a template language](./usage_as_a_template_language.md) as well.
+Note although the @import syntax is used in most of the examples below, in production it is more often that variables are passed to `Mext.compose` as parameters directly. Check out [Usage as a template language](./usage_as_a_template_language.md) as well.
 
 * [if](#if)
 * [for](#for)
