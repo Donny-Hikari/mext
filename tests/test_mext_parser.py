@@ -1034,6 +1034,29 @@ print('It contains code block.')
 ````\
 """)
 
+    res = parser.parse("""\
+Markdown fenced block:
+{@format fenced_block var1 spec=lang, min_fence_num=5}
+""",
+      params={
+        'var1': """\
+This is a markdown block.
+```python
+print('It contains code block.')
+```\
+""",
+        'lang': "markdown",
+    })
+    self.assertEqual(res, """\
+Markdown fenced block:
+`````markdown
+This is a markdown block.
+```python
+print('It contains code block.')
+```
+`````\
+""")
+
   def test_format_lower(self):
     parser = MextParser()
     res = parser.parse("""\

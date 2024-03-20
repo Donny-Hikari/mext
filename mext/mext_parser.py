@@ -45,8 +45,13 @@ class MextParser:
   }
 
   RegExps = ObjDict({
-    'string': r'(?:[^\"\\]|\\.)*',
-    'variable': r'[0-9a-zA-Z_\-\.\[\]]+',
+    'string': (regexp_string := r'(?:[^\"\\]|\\.)*'),
+    'variable': (regexp_variable := r'[0-9a-zA-Z_\-\.\[\]]+'),
+    'integer': (regexp_integer := r'[-+]?\d+'),
+    'float': (regexp_float := r'[-+]?(\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?'),
+    'number': (regexp_number := fr'(?:{regexp_integer}|{regexp_float})'),
+    'quoted_string': (regexp_quoted_string := fr'"{regexp_string}"'),
+    'value': (regexp_value := fr'(?:{regexp_quoted_string}|{regexp_number}|{regexp_variable})'),
   })
 
   def __init__(self):
@@ -220,10 +225,13 @@ class MextParser:
       self.raise_syntax_error(f"Unexpected statement after {self.state.keyword}")
 
   def get_field_value(self, field_name):
-    if re.match(r'^[-+]?\d+$', field_name):
+    reg = MextParser.RegExps
+    if re.match(fr'^{reg.integer}$', field_name):
       return int(field_name)
-    if re.match(r'^[-+]?(\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?$', field_name):
+    if re.match(fr'^{reg.float}$', field_name):
       return float(field_name)
+    if re.match(fr'^{reg.quoted_string}$', field_name):
+      return str(field_name[1:-1])
     try:
       field_value, _ = self.str_formatter.get_field(field_name, args=[], kwargs=self.all_variables)
     except Exception as e:
@@ -637,7 +645,7 @@ class MextParser:
     statement = self.state.statement
 
     reg = MextParser.RegExps
-    parts = re.match(fr'^(?P<format>{reg.string})\s+(?P<varname>{reg.variable})(?:\s+(?P<params>(?:{reg.variable}\s*=\s*\"{reg.string}\")(?:,\s*{reg.variable}\s*=\s*\"{reg.string}\")*))?$', statement)
+    parts = re.match(fr'^(?P<format>{reg.string})\s+(?P<varname>{reg.variable})(?:\s+(?P<params>(?:{reg.variable}\s*=\s*{reg.value})(?:,\s*{reg.variable}\s*=\s*{reg.value})*))?$', statement)
     if parts is None:
       self.raise_syntax_error(f'Keyword "format" requries \'@format "format" variable [param=var,...]\' syntax.')
 
@@ -651,7 +659,9 @@ class MextParser:
     formatter_params = {}
     if parts['params'] is not None:
       clauses = parts['params'].split(',')
-      formatter_params = { k.strip(): v.strip()[1:-1] for k, v in map(lambda p: p.split('=', 1), clauses) }
+      formatter_params = { k.strip(): v.strip() for k, v in map(lambda p: p.split('=', 1), clauses) }
+      for k, v in formatter_params.items():
+        formatter_params[k] = self.get_field_value(v)
 
     format_res = self.formatters[format](field_value, **formatter_params)
     self.append_text(format_res)

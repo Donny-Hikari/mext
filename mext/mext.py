@@ -16,6 +16,7 @@ class Mext:
   def __init__(self):
     self.parser = MextParser()
     self.template = ""
+    self.template_fn = None
     self.params = {}
     self.callbacks = {}
 
@@ -57,6 +58,8 @@ class Mext:
   def set_template(self, template=None, template_fn=None):
     if template_fn is not None:
       template = self._load_template(template_fn)
+    if template is None:
+      raise ValueError('Can not set template with "template" and "template_fn" both being None. To clear template use `clear_template`.')
     self.template = template
     self.template_fn = template_fn
 
@@ -97,6 +100,8 @@ class Mext:
   def compose(self, template=None, template_fn=None, params={}, callbacks={},
       **kwargs) -> Union[str, Tuple[str, dict]]:
     if template is None and template_fn is None:
+      if len(self.template) == 0 and self.template_fn is None:
+        raise ValueError("Neither template or template file is provided. Check if the value is None.")
       template = self.template
       template_fn = self.template_fn
 

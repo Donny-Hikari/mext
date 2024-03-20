@@ -20,8 +20,8 @@ classifiers = [
 file = "LICENSE"
 
 [project.urls]
-homepage = "https://github.com/donny-hikari/mext"
-source = "https://github.com/donny-hikari/mext"
+Homepage = "https://github.com/donny-hikari/mext"
+Repository = "https://github.com/donny-hikari/mext"
 
 [project.scripts]
 render-mext = "mext.scripts.render_mext:render_mext"
