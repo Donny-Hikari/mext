@@ -17,10 +17,10 @@ def indent_lines(s_lines: str, indent):
   s_indented, _ = re.subn(r'(^|\n)', fr'\1{indent_spaces}', s_lines)
   return s_indented
 
-def fence_content(content, spec='', min_fence_num=3):
+def fence_content(content, spec='', min_fence_num=3, marker='`'):
   block_fences = re.findall(r'\`{3,}', content)
   max_block_fences = max([*map(len, block_fences), min_fence_num-1])
-  fence = '`'*(max_block_fences+1)
+  fence = marker*(max_block_fences+1)
   return f'{fence}{spec}\n{content}\n{fence}'
 
 class ObjDict(dict):
